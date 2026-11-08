@@ -49,6 +49,21 @@ class Lesson(db.Model):
     status = db.Column(db.String(20), default="scheduled") # scheduled, completed, cancelled, makeup
 
 with app.app_context():
+    if os.environ.get('DATABASE_URL'):
+        try:
+            from sqlalchemy import inspect, text as sql_text
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            if 'student' in existing_tables:
+                cols = [c['name'] for c in inspector.get_columns('student')]
+                if 'user_id' in cols:
+                    db.session.execute(sql_text('DROP TABLE IF EXISTS lesson CASCADE'))
+                    db.session.execute(sql_text('DROP TABLE IF EXISTS student CASCADE'))
+                    db.session.execute(sql_text('DROP TABLE IF EXISTS "user" CASCADE'))
+                    db.session.commit()
+        except Exception as e:
+            print('Cleanup check:', e)
+
     db.create_all()
     # Nếu chạy với database ngoài (PostgreSQL) mà database còn trống, tự động nạp từ file SQLite cũ
     sqlite_path = os.path.join(BASE_DIR, 'tutoring.db')
