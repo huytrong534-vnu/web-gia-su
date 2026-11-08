@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#4f46e5">
-    <title>Sổ Tay Lịch Gia Sư</title>
+    <title>Sổ Tay Lịch Gia Sư Pro</title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,6 +42,36 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* ===== AUTH SCREEN ===== */
+        .auth-wrapper {
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 14px;
+        }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 45px -10px rgba(79, 70, 229, 0.12);
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 460px;
+        }
+        .dev-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eef2ff;
+            color: #4f46e5;
+            border: 1px solid #c7d2fe;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
         /* ===== HEADER ===== */
         .app-header {
             position: sticky;
@@ -49,7 +79,7 @@
             z-index: 1020;
             background: var(--primary-gradient);
             color: white;
-            padding: 14px 20px;
+            padding: 12px 20px;
             box-shadow: 0 4px 20px -2px rgba(79, 70, 229, 0.35);
         }
         .header-title {
@@ -57,18 +87,18 @@
             font-weight: 800;
             letter-spacing: -0.3px;
         }
-        .btn-reload {
+        .btn-header-action {
             background: rgba(255, 255, 255, 0.16);
             backdrop-filter: blur(8px);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
-            padding: 7px 14px;
-            font-size: 0.85rem;
+            padding: 6px 12px;
+            font-size: 0.82rem;
             font-weight: 700;
             transition: all 0.2s ease;
         }
-        .btn-reload:hover {
+        .btn-header-action:hover {
             background: rgba(255, 255, 255, 0.28);
             color: white;
             transform: translateY(-1px);
@@ -203,7 +233,6 @@
             border-color: #f1f5f9 !important;
         }
 
-        /* Status legend pills */
         .legend-pill {
             display: inline-flex;
             align-items: center;
@@ -272,9 +301,6 @@
             background: #f8fafc;
             transform: translateY(-1px);
         }
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
-        }
         .btn-gradient-success {
             background: var(--success-gradient);
             color: white;
@@ -308,7 +334,6 @@
             box-shadow: 0 6px 18px rgba(244, 63, 94, 0.4);
         }
 
-        /* Color Picker Chips */
         .color-palette {
             display: flex;
             align-items: center;
@@ -331,7 +356,6 @@
             transform: scale(1.18);
         }
 
-        /* Weekday Picker */
         .weekday-grid {
             display: flex;
             gap: 6px;
@@ -361,7 +385,7 @@
             box-shadow: 0 3px 8px rgba(79, 70, 229, 0.3);
         }
 
-        /* ===== INVOICE RECEIPT (Statement Styling) ===== */
+        /* ===== INVOICE RECEIPT ===== */
         #invoiceResult {
             background: #ffffff;
             border: 2px solid #e2e8f0;
@@ -552,8 +576,8 @@
         }
 
         @media (max-width: 767.98px) {
-            .app-header { padding: 10px 14px; }
-            .header-title { font-size: 0.92rem; }
+            .app-header { padding: 10px 12px; }
+            .header-title { font-size: 0.9rem; }
             .glass-card { padding: 16px; border-radius: 16px; }
             #calendar { padding: 8px; border-radius: 16px; }
             .fc .fc-toolbar { gap: 6px !important; margin-bottom: 10px !important; }
@@ -564,322 +588,424 @@
 </head>
 <body>
 
-<!-- ===== HEADER BAR ===== -->
-<header class="app-header no-print">
-    <div class="d-flex justify-content-between align-items-center max-w-7xl mx-auto">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-mortarboard-fill fs-5"></i>
-            <span class="header-title">SỔ TAY GIA SƯ & HỌC PHÍ</span>
+<!-- ===== MÀN HÌNH ĐĂNG NHẬP / TẠO TÀI KHOẢN CHO CÁC GIA SƯ ===== -->
+<div id="authScreen" class="auth-wrapper d-none">
+    <div class="auth-card">
+        <div class="text-center mb-3">
+            <span class="dev-badge mb-2">
+                <i class="bi bi-code-slash"></i> Phát triển bởi Nguyễn Trọng Huy
+            </span>
+            <h4 class="fw-bold text-dark mt-1 mb-1" style="letter-spacing: -0.5px;">SỔ TAY LỊCH GIA SƯ PRO</h4>
+            <p class="text-muted small mb-0">Mỗi gia sư sở hữu không gian quản lý lịch & mã VietQR riêng biệt</p>
         </div>
-        <button id="btnReload" onclick="reloadAppData()" class="btn-reload d-flex align-items-center gap-1">
-            <i class="bi bi-arrow-clockwise"></i> <span>Làm mới</span>
+
+        <!-- Nút trải nghiệm nhanh 1 chạm -->
+        <button onclick="doDemoLogin()" class="btn btn-warning w-100 fw-bold py-2 mb-3 shadow-sm" style="border-radius: 12px; color: #78350f;">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Trải nghiệm thử ngay (Chế độ Demo)
         </button>
-    </div>
-</header>
 
-<div class="container-fluid px-3 px-md-4 py-3">
+        <!-- Hộp thông báo đăng nhập / đăng ký -->
+        <div id="authAlertBox" class="alert d-none py-2 px-3 small mb-3 text-start shadow-sm" style="border-radius: 12px;"></div>
 
-    <!-- Cảnh báo nếu mở nhầm qua file:// -->
-    <div id="fileProtocolAlert" class="alert alert-danger d-none mb-3 shadow-sm" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
-        <strong>Chú ý:</strong> Bạn đang mở trang web trực tiếp qua tệp tin cục bộ (đường dẫn <code>file:///</code>). 
-        Trình duyệt chặn kết nối API nên <strong>không thể lưu được dữ liệu</strong>! 
-        Vui lòng mở terminal chạy lệnh <code>python app.py</code> và truy cập qua địa chỉ: 
-        <a href="http://localhost:5000" class="alert-link fw-bold text-decoration-underline">http://localhost:5000</a>
-    </div>
+        <ul class="nav nav-pills nav-fill mb-3 bg-light p-1" style="border-radius: 12px;">
+            <li class="nav-item">
+                <button class="nav-link active fw-bold small py-2" id="tabLoginBtn" onclick="switchAuthTab('login')" style="border-radius: 10px;">Đăng nhập</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link fw-bold small py-2" id="tabRegisterBtn" onclick="switchAuthTab('register')" style="border-radius: 10px;">Tạo tài khoản Gia sư</button>
+            </li>
+        </ul>
 
-    <!-- ===== DASHBOARD STATS BAR ===== -->
-    <div class="row g-2 g-md-3 mb-3 no-print">
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--primary-gradient);">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-                <div>
-                    <div class="stat-title">Học sinh</div>
-                    <div class="stat-value" id="statStudents">0</div>
-                </div>
+        <!-- Form Đăng nhập -->
+        <div id="loginForm">
+            <div class="mb-2">
+                <label class="form-label-custom">Tên đăng nhập</label>
+                <input type="text" id="loginUser" class="form-control" placeholder="VD: huy" value="huy">
             </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--success-gradient);">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
-                <div>
-                    <div class="stat-title">Đã dạy tháng này</div>
-                    <div class="stat-value text-success" id="statCompleted">0 buổi</div>
-                </div>
+            <div class="mb-3">
+                <label class="form-label-custom">Mật khẩu</label>
+                <input type="password" id="loginPass" class="form-control" placeholder="Mật khẩu của bạn (VD: 123456)" onkeydown="if(event.key==='Enter') doLogin()">
             </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">
-                    <i class="bi bi-calendar3"></i>
-                </div>
-                <div>
-                    <div class="stat-title">Tổng lịch tháng</div>
-                    <div class="stat-value" id="statTotalLessons">0 buổi</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--danger-gradient);">
-                    <i class="bi bi-cash-stack"></i>
-                </div>
-                <div>
-                    <div class="stat-title">Thu nhập đã đạt</div>
-                    <div class="stat-value text-danger" id="statRevenue">0 đ</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        <!-- ===== CALENDAR COLUMN ===== -->
-        <div class="col-xl-8 col-lg-7 order-1 order-lg-2 no-print">
-            <!-- Legend Badges -->
-            <div class="d-flex justify-content-center flex-wrap gap-2 mb-2">
-                <span class="legend-pill"><span class="legend-dot" style="background: #4f46e5;"></span> Chưa dạy</span>
-                <span class="legend-pill"><span class="legend-dot" style="background: #10b981;"></span> Đã hoàn thành (✓)</span>
-                <span class="legend-pill"><span class="legend-dot" style="background: #64748b;"></span> Học sinh nghỉ (✕)</span>
-                <span class="legend-pill"><span class="legend-dot" style="background: #f59e0b;"></span> Dạy bù (↻)</span>
-            </div>
-
-            <!-- Calendar View -->
-            <div id="calendar"></div>
+            <button onclick="doLogin()" class="btn btn-gradient-primary w-100">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Vào Sổ Tay Của Tôi
+            </button>
         </div>
 
-        <!-- ===== SIDEBAR TOOLS ===== -->
-        <div class="col-xl-4 col-lg-5 order-2 order-lg-1">
-
-            <!-- Card 1: Cài đặt học sinh & Màu sắc -->
-            <div class="glass-card mb-3 no-print">
-                <div class="section-header text-primary">
-                    <i class="bi bi-person-fill-gear"></i>
-                    <span>1. Cài đặt Học sinh & Học phí</span>
+        <!-- Form Đăng ký cho Gia sư khác -->
+        <div id="registerForm" class="d-none">
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label class="form-label-custom">Tên đăng nhập</label>
+                    <input type="text" id="regUser" class="form-control" placeholder="VD: minhtutor">
                 </div>
+                <div class="col-6">
+                    <label class="form-label-custom">Tên hiển thị</label>
+                    <input type="text" id="regDisplay" class="form-control" placeholder="VD: Gia sư Minh">
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label-custom">Mật khẩu bảo mật</label>
+                <input type="password" id="regPass" class="form-control" placeholder="Tạo mật khẩu...">
+            </div>
+            <div class="p-2 px-3 rounded-3 bg-light border mb-3 mt-2">
+                <div class="form-label-custom text-primary mb-2"><i class="bi bi-qr-code me-1"></i>Cài đặt Ngân hàng nhận học phí (VietQR):</div>
                 <div class="row g-2 mb-2">
-                    <div class="col-7">
-                        <label class="form-label-custom">Tên học sinh</label>
-                        <input type="text" id="studentName" class="form-control" placeholder="VD: Minh Anh">
-                    </div>
                     <div class="col-5">
-                        <label class="form-label-custom">Đơn giá/buổi</label>
-                        <input type="text" id="studentFee" class="form-control" placeholder="200.000" oninput="formatCurrencyInput(this)">
+                        <select id="regBankId" class="form-select">
+                            <option value="MB">MB Bank</option>
+                            <option value="VCB">Vietcombank</option>
+                            <option value="TCB">Techcombank</option>
+                            <option value="BIDV">BIDV</option>
+                            <option value="ICB">VietinBank</option>
+                            <option value="ACB">ACB</option>
+                            <option value="TPB">TPBank</option>
+                            <option value="VPB">VPBank</option>
+                            <option value="VBA">Agribank</option>
+                            <option value="STB">Sacombank</option>
+                            <option value="VIB">VIB</option>
+                        </select>
+                    </div>
+                    <div class="col-7">
+                        <input type="text" id="regAccNo" class="form-control" placeholder="Số tài khoản nhận tiền">
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label-custom">Màu nhận diện lịch:</label>
-                    <div class="color-palette">
-                        <span class="color-chip active" data-color="#4f46e5" style="background:#4f46e5" onclick="selectStudentColor(this)" title="Indigo"></span>
-                        <span class="color-chip" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectStudentColor(this)" title="Violet"></span>
-                        <span class="color-chip" data-color="#10b981" style="background:#10b981" onclick="selectStudentColor(this)" title="Emerald"></span>
-                        <span class="color-chip" data-color="#f59e0b" style="background:#f59e0b" onclick="selectStudentColor(this)" title="Amber"></span>
-                        <span class="color-chip" data-color="#f43f5e" style="background:#f43f5e" onclick="selectStudentColor(this)" title="Rose"></span>
-                        <span class="color-chip" data-color="#06b6d4" style="background:#06b6d4" onclick="selectStudentColor(this)" title="Cyan"></span>
-                    </div>
-                    <input type="hidden" id="studentColor" value="#4f46e5">
-                </div>
-
-                <div class="d-flex gap-2 mb-3">
-                    <button onclick="saveStudent()" id="btnSaveStudent" class="btn btn-gradient-primary w-100">
-                        <i class="bi bi-check2-circle me-1"></i> Lưu thông tin học sinh
-                    </button>
-                    <button onclick="resetStudentForm()" id="btnCancelEdit" class="btn btn-outline-secondary d-none" type="button" title="Hủy sửa và nhập mới">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-                <!-- Danh sách học sinh đã lưu -->
-                <div class="border-top pt-2">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="form-label-custom m-0"><i class="bi bi-people me-1"></i>Danh sách học sinh (<span id="studentCountBadge">0</span>)</span>
-                        <small class="text-muted" style="font-size: 0.72rem;">Bấm để sửa hoặc xóa</small>
-                    </div>
-                    <div id="studentListContainer" class="d-flex flex-column gap-2" style="max-height: 190px; overflow-y: auto;">
-                        <div class="text-center text-muted py-2 small">Đang tải danh sách...</div>
-                    </div>
+                <div>
+                    <input type="text" id="regAccName" class="form-control" placeholder="Họ tên chủ TK (IN HOA KHÔNG DẤU)">
                 </div>
             </div>
+            <button onclick="doRegister()" class="btn btn-gradient-success w-100">
+                <i class="bi bi-person-plus-fill me-1"></i> Tạo Không Gian Lịch Riêng
+            </button>
+        </div>
+    </div>
+</div>
 
-            <!-- Card 2: Thêm lịch dạy & Cảnh báo trùng lịch -->
-            <div class="glass-card mb-3 no-print">
-                <div class="section-header text-success">
-                    <i class="bi bi-calendar-plus-fill"></i>
-                    <span>2. Thêm lịch dạy</span>
+<!-- ===== GIAO DIỆN CHÍNH (HIỆN KHI ĐÃ ĐĂNG NHẬP) ===== -->
+<div id="mainAppWrapper" class="d-none">
+    <!-- HEADER BAR -->
+    <header class="app-header no-print">
+        <div class="d-flex justify-content-between align-items-center max-w-7xl mx-auto flex-wrap gap-2">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-mortarboard-fill fs-5"></i>
+                    <span class="header-title">SỔ TAY GIA SƯ & HỌC PHÍ</span>
                 </div>
-
-                <div class="mb-2">
-                    <label class="form-label-custom">Chọn học sinh</label>
-                    <div class="input-group">
-                        <select id="lessonStudent" class="form-select" onchange="syncSearchStudent(this.value)"></select>
-                        <button onclick="deleteSelectedStudent()" class="btn btn-outline-danger" type="button" title="Xóa học sinh này">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                    </div>
+                <div style="font-size: 0.74rem; opacity: 0.9;">
+                    Gia sư: <strong id="headerTutorName"></strong> • <span class="fst-italic">Bản quyền: Nguyễn Trọng Huy</span>
                 </div>
-
-                <div class="row g-2 mb-2">
-                    <div class="col-12 col-sm-4">
-                        <label class="form-label-custom">Ngày học</label>
-                        <input type="date" id="lessonDate" class="form-control">
-                    </div>
-                    <div class="col-6 col-sm-4">
-                        <label class="form-label-custom">Giờ vào</label>
-                        <input type="time" id="startTime" class="form-control" value="19:30">
-                    </div>
-                    <div class="col-6 col-sm-4">
-                        <label class="form-label-custom">Giờ tan</label>
-                        <input type="time" id="endTime" class="form-control" value="21:30">
-                    </div>
-                </div>
-
-                <div class="form-check form-switch mb-2 pt-1">
-                    <input class="form-check-input" type="checkbox" id="isRecurring" onchange="toggleRecurring()" style="cursor: pointer;">
-                    <label class="form-check-label fw-bold small text-slate-700" for="isRecurring" style="cursor: pointer;">
-                        <i class="bi bi-arrow-repeat me-1 text-primary"></i> Lặp lại hàng tuần
-                    </label>
-                </div>
-
-                <!-- Box lặp lại -->
-                <div id="recurringBox" class="p-3 mb-2 rounded-3 border bg-light d-none">
-                    <label class="form-label-custom mb-1">Chọn thứ trong tuần:</label>
-                    <div class="weekday-grid mb-2">
-                        <div><input type="checkbox" class="wk-day" id="wd0" value="0"><label for="wd0">T2</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd1" value="1"><label for="wd1">T3</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd2" value="2"><label for="wd2">T4</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd3" value="3"><label for="wd3">T5</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd4" value="4"><label for="wd4">T6</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd5" value="5"><label for="wd5">T7</label></div>
-                        <div><input type="checkbox" class="wk-day" id="wd6" value="6"><label for="wd6">CN</label></div>
-                    </div>
-                    <label class="form-label-custom">Đến hết ngày:</label>
-                    <input type="date" id="endDate" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <input type="text" id="lessonNote" class="form-control" placeholder="Ghi chú bài học (không bắt buộc)">
-                </div>
-
-                <button onclick="addLesson()" class="btn btn-gradient-success w-100">
-                    <i class="bi bi-plus-lg me-1"></i> Thêm vào lịch
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button id="btnAdminPanel" onclick="openAdminModal()" class="btn-header-action d-none align-items-center gap-1" style="background: rgba(220, 38, 38, 0.12); color: #dc2626; border-color: rgba(220, 38, 38, 0.25);" title="Quản trị Người dùng & Phê duyệt">
+                    <i class="bi bi-shield-lock-fill"></i> <span class="d-none d-sm-inline fw-bold">Admin Quản trị</span>
+                    <span id="adminPendingBadge" class="badge rounded-pill bg-danger d-none" style="font-size: 0.65rem; padding: 2px 6px;">0</span>
+                </button>
+                <button id="btnReload" onclick="reloadAppData()" class="btn-header-action d-flex align-items-center gap-1" title="Làm mới dữ liệu">
+                    <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Làm mới</span>
+                </button>
+                <button onclick="openBankModal()" class="btn-header-action d-flex align-items-center gap-1" title="Cài đặt số tài khoản VietQR">
+                    <i class="bi bi-qr-code"></i> <span>Cài đặt QR</span>
+                </button>
+                <button onclick="doLogout()" class="btn-header-action d-flex align-items-center gap-1" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
                 </button>
             </div>
+        </div>
+    </header>
 
-            <!-- Card 3: Tính tiền & Phiếu học phí -->
-            <div class="glass-card">
-                <div class="section-header text-danger no-print">
-                    <i class="bi bi-receipt-cutoff"></i>
-                    <span>3. Tổng kết học phí cuối tháng</span>
+    <div class="container-fluid px-3 px-md-4 py-3">
+
+        <!-- Cảnh báo nếu mở nhầm qua file:// -->
+        <div id="fileProtocolAlert" class="alert alert-danger d-none mb-3 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+            <strong>Chú ý:</strong> Bạn đang mở trang web trực tiếp qua tệp tin cục bộ (đường dẫn <code>file:///</code>). 
+            Vui lòng mở terminal chạy lệnh <code>python app.py</code> và truy cập qua địa chỉ: 
+            <a href="http://localhost:5000" class="alert-link fw-bold text-decoration-underline">http://localhost:5000</a>
+        </div>
+
+        <!-- ===== DASHBOARD STATS BAR ===== -->
+        <div class="row g-2 g-md-3 mb-3 no-print">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary-gradient);">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Học sinh</div>
+                        <div class="stat-value" id="statStudents">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-gradient);">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Đã dạy tháng này</div>
+                        <div class="stat-value text-success" id="statCompleted">0 buổi</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Tổng lịch tháng</div>
+                        <div class="stat-value" id="statTotalLessons">0 buổi</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--danger-gradient);">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <div class="stat-title">Thu nhập đã đạt</div>
+                        <div class="stat-value text-danger" id="statRevenue">0 đ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- ===== CALENDAR COLUMN ===== -->
+            <div class="col-xl-8 col-lg-7 order-1 order-lg-2 no-print">
+                <div class="d-flex justify-content-center flex-wrap gap-2 mb-2">
+                    <span class="legend-pill"><span class="legend-dot" style="background: #4f46e5;"></span> Chưa dạy</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background: #10b981;"></span> Đã hoàn thành (✓)</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background: #64748b;"></span> Học sinh nghỉ (✕)</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background: #f59e0b;"></span> Dạy bù (↻)</span>
                 </div>
 
-                <div class="row g-2 mb-2 no-print">
-                    <div class="col-7">
-                        <label class="form-label-custom">Học sinh</label>
-                        <select id="searchStudentSelect" class="form-select"></select>
+                <div id="calendar"></div>
+            </div>
+
+            <!-- ===== SIDEBAR TOOLS ===== -->
+            <div class="col-xl-4 col-lg-5 order-2 order-lg-1">
+
+                <!-- Card 1: Cài đặt học sinh & Màu sắc -->
+                <div class="glass-card mb-3 no-print">
+                    <div class="section-header text-primary">
+                        <i class="bi bi-person-fill-gear"></i>
+                        <span>1. Cài đặt Học sinh & Học phí</span>
                     </div>
-                    <div class="col-5">
-                        <label class="form-label-custom">Tháng</label>
-                        <input type="month" id="searchMonth" class="form-control">
-                    </div>
-                </div>
-
-                <div class="mb-3 no-print">
-                    <div class="alert alert-light border py-2 px-3 small text-muted d-flex align-items-center gap-2 mb-0" style="border-radius: 10px; font-size: 0.78rem;">
-                        <i class="bi bi-info-circle-fill text-primary fs-6"></i>
-                        <span>Phiếu tự động liệt kê các buổi <b>hoàn thành</b>, <b>dạy bù</b> và <b>buổi nghỉ</b> (buổi nghỉ không tính phí).</span>
-                    </div>
-                </div>
-
-                <button onclick="calculateInvoice()" class="btn btn-gradient-danger w-100 mb-3 no-print">
-                    <i class="bi bi-qr-code-scan me-1"></i> Tạo Phiếu Học Phí & Mã QR
-                </button>
-
-                <!-- KHUNG PHIẾU BÁO HỌC PHÍ (STATEMENT LUXURY) -->
-                <div id="invoiceContainer" class="d-none">
-                    <div id="invoiceResult">
-                        <div class="invoice-badge-header">
-                            <h4>PHIẾU BÁO HỌC PHÍ</h4>
-                            <div class="text-muted small mt-1">Sổ tay theo dõi giảng dạy gia sư</div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-7">
+                            <label class="form-label-custom">Tên học sinh</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="VD: Minh Anh">
                         </div>
-
-                        <!-- Thông tin tóm tắt -->
-                        <div class="invoice-meta-box">
-                            <div class="row g-2 small">
-                                <div class="col-6">
-                                    <span class="text-muted">Học sinh:</span>
-                                    <div class="fw-bold text-primary fs-6" id="invName"></div>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <span class="text-muted">Kỳ học phí:</span>
-                                    <div class="fw-bold text-dark fs-6" id="invMonth"></div>
-                                </div>
-                                <div class="col-6">
-                                    <span class="text-muted">Đơn giá:</span>
-                                    <div class="fw-bold"><span id="invFee"></span> đ/buổi</div>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <span class="text-muted">Số buổi tính phí:</span>
-                                    <div class="fw-bold text-success fs-6"><span id="invBillableCount">0</span> buổi</div>
-                                </div>
-                            </div>
-                            <!-- Chi tiết phân loại các buổi -->
-                            <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top justify-content-between align-items-center" style="font-size: 0.76rem;">
-                                <span><i class="bi bi-check-circle-fill text-success me-1"></i>Hoàn thành: <b id="invCompletedCount">0</b></span>
-                                <span><i class="bi bi-arrow-repeat text-warning me-1"></i>Dạy bù: <b id="invMakeupCount">0</b></span>
-                                <span><i class="bi bi-x-circle text-muted me-1"></i>Nghỉ (0đ): <b id="invCancelledCount">0</b></span>
-                            </div>
-                        </div>
-
-                        <!-- Bảng chi tiết các buổi học -->
-                        <div class="table-responsive" style="overflow-x: visible;">
-                            <table class="receipt-table mb-2">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 38%;">Thứ & Ngày</th>
-                                        <th style="width: 27%;">Giờ học</th>
-                                        <th style="width: 35%; text-align: right;">Trạng thái / Ghi chú</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invTableBody"></tbody>
-                            </table>
-                        </div>
-
-                        <!-- Hộp tổng tiền học phí -->
-                        <div class="invoice-total-card">
-                            <div class="fw-bold text-danger text-uppercase small" style="letter-spacing: 0.5px; font-size: 0.85rem;">
-                                TỔNG HỌC PHÍ CẦN ĐÓNG
-                            </div>
-                            <div class="small text-muted my-1" id="invTotalSubtext" style="font-size: 0.78rem;">
-                                (Tính 0 buổi = 0 hoàn thành + 0 dạy bù)
-                            </div>
-                            <div class="fw-bold text-danger fs-3 mt-1" style="white-space: nowrap; font-weight: 800;">
-                                <span id="invTotal">0</span> VNĐ
-                            </div>
-                        </div>
-
-                        <!-- Mã QR VietQR -->
-                        <div class="qr-card-box">
-                            <div class="small text-muted mb-2 fw-semibold">Quét mã QR để chuyển khoản nhanh:</div>
-                            <img id="qrImage" src="" alt="Mã VietQR" class="img-fluid mb-2">
-                            <div class="small text-secondary fw-medium" id="invBankInfo"></div>
+                        <div class="col-5">
+                            <label class="form-label-custom">Đơn giá/buổi</label>
+                            <input type="text" id="studentFee" class="form-control" placeholder="200.000" oninput="formatCurrencyInput(this)">
                         </div>
                     </div>
 
-                    <!-- Nút thao tác: Tải ảnh PNG + In / PDF -->
-                    <div class="d-flex gap-2 mt-3 no-print">
-                        <button id="btnDownloadInvoice" onclick="downloadInvoiceImage()" class="btn btn-outline-primary flex-grow-1 fw-bold py-2" style="border-radius: 12px;">
-                            <i class="bi bi-download me-1"></i> Lưu / Tải ảnh phiếu
+                    <div class="mb-3">
+                        <label class="form-label-custom">Màu nhận diện lịch:</label>
+                        <div class="color-palette">
+                            <span class="color-chip active" data-color="#4f46e5" style="background:#4f46e5" onclick="selectStudentColor(this)" title="Indigo"></span>
+                            <span class="color-chip" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectStudentColor(this)" title="Violet"></span>
+                            <span class="color-chip" data-color="#10b981" style="background:#10b981" onclick="selectStudentColor(this)" title="Emerald"></span>
+                            <span class="color-chip" data-color="#f59e0b" style="background:#f59e0b" onclick="selectStudentColor(this)" title="Amber"></span>
+                            <span class="color-chip" data-color="#f43f5e" style="background:#f43f5e" onclick="selectStudentColor(this)" title="Rose"></span>
+                            <span class="color-chip" data-color="#06b6d4" style="background:#06b6d4" onclick="selectStudentColor(this)" title="Cyan"></span>
+                        </div>
+                        <input type="hidden" id="studentColor" value="#4f46e5">
+                    </div>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button onclick="saveStudent()" id="btnSaveStudent" class="btn btn-gradient-primary w-100">
+                            <i class="bi bi-check2-circle me-1"></i> Lưu thông tin học sinh
                         </button>
-                        <button onclick="window.print()" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 12px;">
-                            <i class="bi bi-printer me-1"></i> In / PDF
+                        <button onclick="resetStudentForm()" id="btnCancelEdit" class="btn btn-outline-secondary d-none" type="button" title="Hủy sửa và nhập mới">
+                            <i class="bi bi-x-lg"></i>
                         </button>
+                    </div>
+
+                    <!-- Danh sách học sinh đã lưu -->
+                    <div class="border-top pt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="form-label-custom m-0"><i class="bi bi-people me-1"></i>Danh sách học sinh (<span id="studentCountBadge">0</span>)</span>
+                            <small class="text-muted" style="font-size: 0.72rem;">Bấm để sửa hoặc xóa</small>
+                        </div>
+                        <div id="studentListContainer" class="d-flex flex-column gap-2" style="max-height: 190px; overflow-y: auto;">
+                            <div class="text-center text-muted py-2 small">Đang tải danh sách...</div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Card 2: Thêm lịch dạy & Cảnh báo trùng lịch -->
+                <div class="glass-card mb-3 no-print">
+                    <div class="section-header text-success">
+                        <i class="bi bi-calendar-plus-fill"></i>
+                        <span>2. Thêm lịch dạy</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label-custom">Chọn học sinh</label>
+                        <div class="input-group">
+                            <select id="lessonStudent" class="form-select" onchange="syncSearchStudent(this.value)"></select>
+                            <button onclick="deleteSelectedStudent()" class="btn btn-outline-danger" type="button" title="Xóa học sinh này">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label-custom">Ngày học</label>
+                            <input type="date" id="lessonDate" class="form-control">
+                        </div>
+                        <div class="col-6 col-sm-4">
+                            <label class="form-label-custom">Giờ vào</label>
+                            <input type="time" id="startTime" class="form-control" value="19:30">
+                        </div>
+                        <div class="col-6 col-sm-4">
+                            <label class="form-label-custom">Giờ tan</label>
+                            <input type="time" id="endTime" class="form-control" value="21:30">
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-2 pt-1">
+                        <input class="form-check-input" type="checkbox" id="isRecurring" onchange="toggleRecurring()" style="cursor: pointer;">
+                        <label class="form-check-label fw-bold small text-slate-700" for="isRecurring" style="cursor: pointer;">
+                            <i class="bi bi-arrow-repeat me-1 text-primary"></i> Lặp lại hàng tuần
+                        </label>
+                    </div>
+
+                    <div id="recurringBox" class="p-3 mb-2 rounded-3 border bg-light d-none">
+                        <label class="form-label-custom mb-1">Chọn thứ trong tuần:</label>
+                        <div class="weekday-grid mb-2">
+                            <div><input type="checkbox" class="wk-day" id="wd0" value="0"><label for="wd0">T2</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd1" value="1"><label for="wd1">T3</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd2" value="2"><label for="wd2">T4</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd3" value="3"><label for="wd3">T5</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd4" value="4"><label for="wd4">T6</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd5" value="5"><label for="wd5">T7</label></div>
+                            <div><input type="checkbox" class="wk-day" id="wd6" value="6"><label for="wd6">CN</label></div>
+                        </div>
+                        <label class="form-label-custom">Đến hết ngày:</label>
+                        <input type="date" id="endDate" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" id="lessonNote" class="form-control" placeholder="Ghi chú bài học (không bắt buộc)">
+                    </div>
+
+                    <button onclick="addLesson()" class="btn btn-gradient-success w-100">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm vào lịch
+                    </button>
+                </div>
+
+                <!-- Card 3: Tính tiền & Phiếu học phí -->
+                <div class="glass-card">
+                    <div class="section-header text-danger no-print">
+                        <i class="bi bi-receipt-cutoff"></i>
+                        <span>3. Tổng kết học phí cuối tháng</span>
+                    </div>
+
+                    <div class="row g-2 mb-2 no-print">
+                        <div class="col-7">
+                            <label class="form-label-custom">Học sinh</label>
+                            <select id="searchStudentSelect" class="form-select"></select>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label-custom">Tháng</label>
+                            <input type="month" id="searchMonth" class="form-control" onchange="loadStats()">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 no-print">
+                        <div class="alert alert-light border py-2 px-3 small text-muted d-flex align-items-center gap-2 mb-0" style="border-radius: 10px; font-size: 0.78rem;">
+                            <i class="bi bi-info-circle-fill text-primary fs-6"></i>
+                            <span>Phiếu tự động liệt kê các buổi <b>hoàn thành</b>, <b>dạy bù</b> và <b>buổi nghỉ</b> (buổi nghỉ không tính phí).</span>
+                        </div>
+                    </div>
+
+                    <button onclick="calculateInvoice()" class="btn btn-gradient-danger w-100 mb-3 no-print">
+                        <i class="bi bi-qr-code-scan me-1"></i> Tạo Phiếu Học Phí & Mã QR
+                    </button>
+
+                    <!-- KHUNG PHIẾU BÁO HỌC PHÍ -->
+                    <div id="invoiceContainer" class="d-none">
+                        <div id="invoiceResult">
+                            <div class="invoice-badge-header">
+                                <h4>PHIẾU BÁO HỌC PHÍ</h4>
+                                <div class="text-muted small mt-1">Gia sư phụ trách: <strong id="invTutorName" class="text-dark"></strong></div>
+                            </div>
+
+                            <div class="invoice-meta-box">
+                                <div class="row g-2 small">
+                                    <div class="col-6">
+                                        <span class="text-muted">Học sinh:</span>
+                                        <div class="fw-bold text-primary fs-6" id="invName"></div>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span class="text-muted">Kỳ học phí:</span>
+                                        <div class="fw-bold text-dark fs-6" id="invMonth"></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted">Đơn giá:</span>
+                                        <div class="fw-bold"><span id="invFee"></span> đ/buổi</div>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span class="text-muted">Số buổi tính phí:</span>
+                                        <div class="fw-bold text-success fs-6"><span id="invBillableCount">0</span> buổi</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top justify-content-between align-items-center" style="font-size: 0.76rem;">
+                                    <span><i class="bi bi-check-circle-fill text-success me-1"></i>Hoàn thành: <b id="invCompletedCount">0</b></span>
+                                    <span><i class="bi bi-arrow-repeat text-warning me-1"></i>Dạy bù: <b id="invMakeupCount">0</b></span>
+                                    <span><i class="bi bi-x-circle text-muted me-1"></i>Nghỉ (0đ): <b id="invCancelledCount">0</b></span>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive" style="overflow-x: visible;">
+                                <table class="receipt-table mb-2">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 38%;">Thứ & Ngày</th>
+                                            <th style="width: 27%;">Giờ học</th>
+                                            <th style="width: 35%; text-align: right;">Trạng thái / Ghi chú</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invTableBody"></tbody>
+                                </table>
+                            </div>
+
+                            <div class="invoice-total-card">
+                                <div class="fw-bold text-danger text-uppercase small" style="letter-spacing: 0.5px; font-size: 0.85rem;">
+                                    TỔNG HỌC PHÍ CẦN ĐÓNG
+                                </div>
+                                <div class="small text-muted my-1" id="invTotalSubtext" style="font-size: 0.78rem;">
+                                    (Tính 0 buổi = 0 hoàn thành + 0 dạy bù)
+                                </div>
+                                <div class="fw-bold text-danger fs-3 mt-1" style="white-space: nowrap; font-weight: 800;">
+                                    <span id="invTotal">0</span> VNĐ
+                                </div>
+                            </div>
+
+                            <div class="qr-card-box">
+                                <div class="small text-muted mb-2 fw-semibold">Quét mã QR để chuyển khoản nhanh:</div>
+                                <img id="qrImage" src="" alt="Mã VietQR" class="img-fluid mb-2">
+                                <div class="small text-secondary fw-medium" id="invBankInfo"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3 no-print">
+                            <button id="btnDownloadInvoice" onclick="downloadInvoiceImage()" class="btn btn-outline-primary flex-grow-1 fw-bold py-2" style="border-radius: 12px;">
+                                <i class="bi bi-download me-1"></i> Lưu / Tải ảnh phiếu
+                            </button>
+                            <button onclick="window.print()" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 12px;">
+                                <i class="bi bi-printer me-1"></i> In / PDF
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -954,6 +1080,62 @@
     </div>
 </div>
 
+<!-- ===== MODAL CÀI ĐẶT TÀI KHOẢN & MÃ VIETQR CỦA TỪNG GIA SƯ ===== -->
+<div class="modal fade" id="bankModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-qr-code text-primary me-1"></i> Cài đặt Hồ sơ & Ngân hàng VietQR
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-2">
+                    <label class="form-label-custom">Tên Gia sư hiển thị trên Phiếu học phí</label>
+                    <input type="text" id="cfgDisplayName" class="form-control">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-5">
+                        <label class="form-label-custom">Ngân hàng</label>
+                        <select id="cfgBankId" class="form-select">
+                            <option value="MB">MB Bank</option>
+                            <option value="VCB">Vietcombank</option>
+                            <option value="TCB">Techcombank</option>
+                            <option value="BIDV">BIDV</option>
+                            <option value="ICB">VietinBank</option>
+                            <option value="ACB">ACB</option>
+                            <option value="TPB">TPBank</option>
+                            <option value="VPB">VPBank</option>
+                            <option value="VBA">Agribank</option>
+                            <option value="STB">Sacombank</option>
+                            <option value="VIB">VIB</option>
+                        </select>
+                    </div>
+                    <div class="col-7">
+                        <label class="form-label-custom">Số tài khoản nhận học phí</label>
+                        <input type="text" id="cfgAccNo" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Tên chủ tài khoản (VIẾT HOA KHÔNG DẤU)</label>
+                    <input type="text" id="cfgAccName" class="form-control">
+                </div>
+                <hr>
+                <div class="mb-1">
+                    <label class="form-label-custom">Đổi mật khẩu mới (Để trống nếu giữ nguyên)</label>
+                    <input type="password" id="cfgNewPass" class="form-control" placeholder="Nhập mật khẩu mới nếu muốn đổi...">
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button onclick="saveProfileConfig()" class="btn btn-gradient-primary w-100">
+                    <i class="bi bi-check2-circle me-1"></i> Lưu cài đặt của tôi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ===== MODAL XEM & LƯU ẢNH PHIẾU HỌC PHÍ TRÊN ĐIỆN THOẠI ===== -->
 <div class="modal fade" id="previewImageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -984,13 +1166,128 @@
     </div>
 </div>
 
+<!-- ===== MODAL QUẢN TRỊ VIÊN & QUẢN LÝ NGƯỜI DÙNG (DÀNH CHO ADMIN) ===== -->
+<div class="modal fade" id="adminUsersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">
+                        <i class="bi bi-shield-lock-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold mb-0">Quản Trị Người Dùng & Phê Duyệt Tài Khoản</h6>
+                        <span style="font-size: 0.75rem; opacity: 0.8;">Phê duyệt gia sư mới, phân quyền và quản lý tài khoản</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3 p-md-4" style="background: #f8fafc;">
+                <!-- STATS SUMMARY CARDS -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 p-md-3 rounded-3 bg-white border shadow-sm text-center">
+                            <div class="text-muted small">Tổng tài khoản</div>
+                            <div class="fs-4 fw-bold text-dark" id="adminStatTotal">0</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 p-md-3 rounded-3 bg-white border border-warning shadow-sm text-center">
+                            <div class="text-warning fw-bold small"><i class="bi bi-hourglass-split me-1"></i>Chờ phê duyệt</div>
+                            <div class="fs-4 fw-bold text-warning" id="adminStatPending">0</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 p-md-3 rounded-3 bg-white border border-success shadow-sm text-center">
+                            <div class="text-success fw-bold small"><i class="bi bi-check-circle-fill me-1"></i>Đã kích hoạt</div>
+                            <div class="fs-4 fw-bold text-success" id="adminStatApproved">0</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 p-md-3 rounded-3 bg-white border border-danger shadow-sm text-center">
+                            <div class="text-danger fw-bold small"><i class="bi bi-x-circle-fill me-1"></i>Đã từ chối</div>
+                            <div class="fs-4 fw-bold text-danger" id="adminStatRejected">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOLBAR: SEARCH & FILTER TABS -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div class="btn-group btn-group-sm flex-wrap" role="group">
+                        <button type="button" class="btn btn-outline-secondary active fw-bold" id="filterTabAll" onclick="setAdminFilter('all')">
+                            Tất cả (<span id="countFilterAll">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-outline-warning fw-bold" id="filterTabPending" onclick="setAdminFilter('pending')">
+                            ⏳ Chờ duyệt (<span id="countFilterPending">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-outline-success fw-bold" id="filterTabApproved" onclick="setAdminFilter('approved')">
+                            ✓ Đã kích hoạt (<span id="countFilterApproved">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-outline-danger fw-bold" id="filterTabRejected" onclick="setAdminFilter('rejected')">
+                            ✕ Từ chối (<span id="countFilterRejected">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2" style="min-width: 240px; max-width: 320px; flex-grow: 1;">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="adminSearchInput" oninput="renderAdminUsersTable()" class="form-control border-start-0" placeholder="Tìm tên, username, STK...">
+                        </div>
+                        <button class="btn btn-sm btn-light border" onclick="loadAdminUsers()" title="Tải lại danh sách">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ALERT BOX INSIDE ADMIN MODAL -->
+                <div id="adminModalAlert" class="alert d-none py-2 px-3 small mb-3" style="border-radius: 10px;"></div>
+
+                <!-- USERS TABLE -->
+                <div class="table-responsive bg-white rounded-3 border shadow-sm">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 45px;" class="text-center">#</th>
+                                <th>Gia sư / Tài khoản</th>
+                                <th>Ngân hàng nhận QR</th>
+                                <th class="text-center">Dữ liệu</th>
+                                <th>Ngày tạo</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-end" style="min-width: 210px;">Thao tác quản trị</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2"></div> Đang tải danh sách người dùng...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-light border-0 py-2 d-flex justify-content-between">
+                <span class="text-muted small"><i class="bi bi-shield-check text-success me-1"></i>Hệ thống bảo vệ đa người dùng: Nguyễn Trọng Huy</span>
+                <button type="button" class="btn btn-sm btn-secondary px-3" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let calendar;
     let editModal;
+    let bankModal;
+    let adminModal = null;
     let currentModalStatus = 'scheduled';
     let cachedStudents = [];
     let currentInvoiceData = null;
+    let currentUser = null;
+    let adminUsersCache = [];
+    let currentAdminFilter = 'all';
 
     function formatVNNumber(num) {
         return Number(num).toLocaleString('vi-VN');
@@ -1008,10 +1305,407 @@
         document.getElementById('studentColor').value = el.getAttribute('data-color');
     }
 
+    function showAuthAlert(msg, type = "danger") {
+        const box = document.getElementById('authAlertBox');
+        if (!box) return alert(msg);
+        box.className = `alert alert-${type} py-2 px-3 small mb-3 text-start shadow-sm`;
+        box.innerHTML = msg;
+        box.classList.remove('d-none');
+    }
+
+    function hideAuthAlert() {
+        const box = document.getElementById('authAlertBox');
+        if (box) box.classList.add('d-none');
+    }
+
+    function switchAuthTab(tab) {
+        hideAuthAlert();
+        const isLogin = (tab === 'login');
+        document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
+        document.getElementById('tabRegisterBtn').classList.toggle('active', !isLogin);
+        document.getElementById('loginForm').classList.toggle('d-none', !isLogin);
+        document.getElementById('registerForm').classList.toggle('d-none', isLogin);
+    }
+
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/auth/me?t=' + Date.now());
+            const data = await res.json();
+            if (data.logged_in) {
+                currentUser = data;
+                document.getElementById('authScreen').classList.add('d-none');
+                document.getElementById('mainAppWrapper').classList.remove('d-none');
+                document.getElementById('headerTutorName').innerText = data.display_name || data.username;
+
+                // Hiển thị nút Admin nếu là Quản trị viên
+                const btnAdmin = document.getElementById('btnAdminPanel');
+                if (data.is_admin) {
+                    btnAdmin.classList.remove('d-none');
+                    btnAdmin.classList.add('d-flex');
+                    const badge = document.getElementById('adminPendingBadge');
+                    if (data.pending_count > 0) {
+                        badge.innerText = data.pending_count;
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                } else {
+                    btnAdmin.classList.add('d-none');
+                    btnAdmin.classList.remove('d-flex');
+                }
+
+                initCalendar();
+                await loadStudents();
+                await loadStats();
+            } else {
+                currentUser = null;
+                document.getElementById('authScreen').classList.remove('d-none');
+                document.getElementById('mainAppWrapper').classList.add('d-none');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function doLogin() {
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value.trim();
+        if (!username || !password) {
+            showAuthAlert("Vui lòng nhập tên đăng nhập và mật khẩu!", "danger");
+            return;
+        }
+
+        hideAuthAlert();
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                if (data.status === 'pending') {
+                    showAuthAlert('<i class="bi bi-hourglass-split me-1 fs-6"></i> <strong>Tài khoản đang chờ duyệt:</strong> Tài khoản của bạn đã tạo thành công nhưng cần được Quản trị viên (Admin) phê duyệt trước khi có thể sử dụng. Vui lòng liên hệ Admin để được cấp quyền!', "warning");
+                } else if (data.status === 'rejected') {
+                    showAuthAlert('<i class="bi bi-x-octagon-fill me-1 fs-6"></i> <strong>Từ chối truy cập:</strong> Tài khoản của bạn đã bị Quản trị viên từ chối truy cập hệ thống.', "danger");
+                } else {
+                    showAuthAlert(data.error || "Lỗi đăng nhập!", "danger");
+                }
+                return;
+            }
+            document.getElementById('invoiceContainer').classList.add('d-none');
+            await checkAuth();
+        } catch (e) {
+            showAuthAlert("Không thể kết nối đến máy chủ!", "danger");
+        }
+    }
+
+    async function doDemoLogin() {
+        hideAuthAlert();
+        await fetch('/api/auth/demo', { method: 'POST' });
+        document.getElementById('invoiceContainer').classList.add('d-none');
+        await checkAuth();
+    }
+
+    async function doRegister() {
+        const payload = {
+            username: document.getElementById('regUser').value.trim(),
+            display_name: document.getElementById('regDisplay').value.trim(),
+            password: document.getElementById('regPass').value.trim(),
+            bank_id: document.getElementById('regBankId').value,
+            account_no: document.getElementById('regAccNo').value.trim(),
+            account_name: document.getElementById('regAccName').value.trim()
+        };
+        if (!payload.username || !payload.password) {
+            showAuthAlert("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!", "danger");
+            return;
+        }
+
+        hideAuthAlert();
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showAuthAlert(data.error || "Lỗi đăng ký tài khoản!", "danger");
+                return;
+            }
+
+            // Tự động chuyển về tab đăng nhập và điền sẵn username
+            switchAuthTab('login');
+            document.getElementById('loginUser').value = payload.username;
+            document.getElementById('loginPass').value = '';
+            showAuthAlert('<i class="bi bi-check-circle-fill me-1 fs-6"></i> <strong>Đăng ký thành công!</strong> Tài khoản của bạn đã được lưu và đang ở trạng thái <b>Chờ Admin phê duyệt</b>. Sau khi Admin chấp nhận, bạn sẽ đăng nhập được ngay.', "success");
+        } catch (e) {
+            showAuthAlert("Không thể kết nối đến máy chủ!", "danger");
+        }
+    }
+
+    // --- CÁC HÀM XỬ LÝ QUẢN TRỊ ADMIN ---
+    function openAdminModal() {
+        if (!currentUser || !currentUser.is_admin) {
+            alert("Bạn không có quyền quản trị viên!");
+            return;
+        }
+        if (!adminModal) {
+            adminModal = new bootstrap.Modal(document.getElementById('adminUsersModal'));
+        }
+        loadAdminUsers();
+        adminModal.show();
+    }
+
+    async function loadAdminUsers() {
+        const tbody = document.getElementById('adminUsersTableBody');
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Đang tải danh sách người dùng...</td></tr>`;
+        try {
+            const res = await fetch('/api/admin/users?t=' + Date.now());
+            if (!res.ok) throw new Error("Lỗi tải danh sách người dùng");
+            const data = await res.json();
+            adminUsersCache = data.users || [];
+
+            const total = adminUsersCache.length;
+            const pending = adminUsersCache.filter(u => u.status === 'pending').length;
+            const approved = adminUsersCache.filter(u => u.status === 'approved').length;
+            const rejected = adminUsersCache.filter(u => u.status === 'rejected').length;
+
+            document.getElementById('adminStatTotal').innerText = total;
+            document.getElementById('adminStatPending').innerText = pending;
+            document.getElementById('adminStatApproved').innerText = approved;
+            document.getElementById('adminStatRejected').innerText = rejected;
+
+            document.getElementById('countFilterAll').innerText = total;
+            document.getElementById('countFilterPending').innerText = pending;
+            document.getElementById('countFilterApproved').innerText = approved;
+            document.getElementById('countFilterRejected').innerText = rejected;
+
+            // Cập nhật badge cảnh báo trên thanh Header
+            const headerBadge = document.getElementById('adminPendingBadge');
+            if (pending > 0) {
+                headerBadge.innerText = pending;
+                headerBadge.classList.remove('d-none');
+            } else {
+                headerBadge.classList.add('d-none');
+            }
+
+            renderAdminUsersTable();
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle me-1"></i> Có lỗi xảy ra khi tải danh sách người dùng!</td></tr>`;
+        }
+    }
+
+    function setAdminFilter(filter) {
+        currentAdminFilter = filter;
+        document.querySelectorAll('#filterTabAll, #filterTabPending, #filterTabApproved, #filterTabRejected').forEach(btn => btn.classList.remove('active'));
+        if (filter === 'all') document.getElementById('filterTabAll').classList.add('active');
+        if (filter === 'pending') document.getElementById('filterTabPending').classList.add('active');
+        if (filter === 'approved') document.getElementById('filterTabApproved').classList.add('active');
+        if (filter === 'rejected') document.getElementById('filterTabRejected').classList.add('active');
+        renderAdminUsersTable();
+    }
+
+    function renderAdminUsersTable() {
+        const tbody = document.getElementById('adminUsersTableBody');
+        const q = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
+
+        let filtered = adminUsersCache.filter(u => {
+            if (currentAdminFilter !== 'all' && u.status !== currentAdminFilter) return false;
+            if (q) {
+                const matchName = (u.display_name || '').toLowerCase().includes(q);
+                const matchUser = (u.username || '').toLowerCase().includes(q);
+                const matchAcc = (u.account_no || '').toLowerCase().includes(q);
+                const matchAccName = (u.account_name || '').toLowerCase().includes(q);
+                return matchName || matchUser || matchAcc || matchAccName;
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><i class="bi bi-inbox me-1"></i> Không tìm thấy người dùng nào phù hợp bộ lọc!</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        filtered.forEach((u, idx) => {
+            let statusBadge = '';
+            if (u.status === 'pending') {
+                statusBadge = '<span class="badge bg-warning text-dark py-1 px-2"><i class="bi bi-hourglass-split me-1"></i>Chờ duyệt</span>';
+            } else if (u.status === 'approved') {
+                statusBadge = '<span class="badge bg-success py-1 px-2"><i class="bi bi-check-circle-fill me-1"></i>Đã duyệt</span>';
+            } else if (u.status === 'rejected') {
+                statusBadge = '<span class="badge bg-danger py-1 px-2"><i class="bi bi-x-circle-fill me-1"></i>Từ chối</span>';
+            } else {
+                statusBadge = `<span class="badge bg-secondary py-1 px-2">${u.status}</span>`;
+            }
+
+            let roleBadge = u.is_admin ? '<span class="badge bg-danger ms-1" style="font-size: 0.68rem;"><i class="bi bi-shield-fill"></i> Admin</span>' : '';
+            let selfBadge = u.is_self ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 ms-1" style="font-size: 0.68rem;">Bạn</span>' : '';
+
+            let actionsHtml = '';
+            if (u.is_self) {
+                actionsHtml = '<span class="text-muted small fst-italic"><i class="bi bi-person-check text-primary me-1"></i>Tài khoản hiện tại</span>';
+            } else {
+                let approveBtn = '';
+                if (u.status !== 'approved') {
+                    approveBtn = `<button class="btn btn-sm btn-success py-1 px-2 fw-semibold" onclick="updateUserStatus(${u.id}, 'approved')" title="Phê duyệt cho phép dùng"><i class="bi bi-check-lg"></i> Duyệt</button>`;
+                }
+                let rejectBtn = '';
+                if (u.status !== 'rejected') {
+                    rejectBtn = `<button class="btn btn-sm btn-outline-warning py-1 px-2 fw-semibold" onclick="updateUserStatus(${u.id}, 'rejected')" title="Từ chối/Khóa đăng nhập"><i class="bi bi-slash-circle"></i> Từ chối</button>`;
+                }
+                let delBtn = `<button class="btn btn-sm btn-outline-danger py-1 px-2 fw-semibold" onclick="deleteUserAccount(${u.id}, '${escapeHtml(u.username)}')" title="Xóa tài khoản vĩnh viễn"><i class="bi bi-trash3-fill"></i> Xóa</button>`;
+                let roleBtn = `<button class="btn btn-sm ${u.is_admin ? 'btn-danger text-white' : 'btn-outline-secondary'} py-1 px-2" onclick="toggleUserAdmin(${u.id}, '${escapeHtml(u.username)}')" title="${u.is_admin ? 'Hạ quyền xuống Gia sư thường' : 'Thăng cấp thành Quản trị viên (Admin)'}"><i class="bi bi-shield"></i></button>`;
+
+                actionsHtml = `<div class="d-flex justify-content-end gap-1 flex-wrap">${approveBtn}${rejectBtn}${delBtn}${roleBtn}</div>`;
+            }
+
+            let bankInfo = u.account_no ? `<div class="fw-semibold text-dark">${u.bank_id} - ${escapeHtml(u.account_no)}</div><div class="text-muted" style="font-size: 0.72rem;">${escapeHtml(u.account_name) || '---'}</div>` : '<span class="text-muted small">Chưa cài đặt</span>';
+
+            html += `
+            <tr class="${u.status === 'pending' ? 'table-warning bg-opacity-25' : ''}">
+                <td class="text-center text-muted fw-bold">${idx + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 34px; height: 34px; background: ${u.is_admin ? '#dc2626' : '#4f46e5'}; font-size: 0.85rem; flex-shrink: 0;">
+                            ${(u.display_name || u.username).charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark d-flex align-items-center flex-wrap">${escapeHtml(u.display_name || u.username)} ${roleBadge} ${selfBadge}</div>
+                            <div class="text-muted small">@${escapeHtml(u.username)}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>${bankInfo}</td>
+                <td class="text-center">
+                    <span class="badge bg-light text-dark border">${u.student_count || 0} HS</span>
+                    <span class="badge bg-light text-secondary border">${u.lesson_count || 0} buổi</span>
+                </td>
+                <td class="text-muted small">${u.created_at || '---'}</td>
+                <td class="text-center">${statusBadge}</td>
+                <td class="text-end">${actionsHtml}</td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    async function updateUserStatus(userId, status) {
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/status`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status})
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Không thể cập nhật trạng thái!");
+                return;
+            }
+            showAdminAlert(data.message, "success");
+            await loadAdminUsers();
+        } catch (e) {
+            alert("Lỗi kết nối khi cập nhật trạng thái!");
+        }
+    }
+
+    async function deleteUserAccount(userId, username) {
+        const confirmMsg = `CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản "${username}" không?\n\n- Toàn bộ danh sách học sinh của gia sư này sẽ bị xóa.\n- Toàn bộ lịch dạy và doanh thu liên quan sẽ bị xóa sạch.\n- Thao tác này KHÔNG thể khôi phục!`;
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Không thể xóa tài khoản!");
+                return;
+            }
+            showAdminAlert(data.message, "success");
+            await loadAdminUsers();
+        } catch (e) {
+            alert("Lỗi kết nối khi xóa tài khoản!");
+        }
+    }
+
+    async function toggleUserAdmin(userId, username) {
+        if (!confirm(`Bạn có chắc chắn muốn thay đổi quyền Quản trị viên (Admin) cho tài khoản "${username}"?`)) return;
+
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/toggle-admin`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Không thể cập nhật quyền!");
+                return;
+            }
+            showAdminAlert(data.message, "success");
+            await loadAdminUsers();
+        } catch (e) {
+            alert("Lỗi kết nối khi thay đổi quyền!");
+        }
+    }
+
+    function showAdminAlert(msg, type = "success") {
+        const el = document.getElementById('adminModalAlert');
+        if (!el) return alert(msg);
+        el.className = `alert alert-${type} py-2 px-3 small mb-3`;
+        el.innerHTML = `<i class="bi bi-info-circle-fill me-1"></i> ${msg}`;
+        el.classList.remove('d-none');
+        setTimeout(() => {
+            el.classList.add('d-none');
+        }, 5000);
+    }
+
+    function openBankModal() {
+        if (!currentUser) return;
+        document.getElementById('cfgDisplayName').value = currentUser.display_name || '';
+        document.getElementById('cfgBankId').value = (currentUser.bank && currentUser.bank.BANK_ID) || 'MB';
+        document.getElementById('cfgAccNo').value = (currentUser.bank && currentUser.bank.ACCOUNT_NO) || '';
+        document.getElementById('cfgAccName').value = (currentUser.bank && currentUser.bank.ACCOUNT_NAME) || '';
+        document.getElementById('cfgNewPass').value = '';
+        bankModal.show();
+    }
+
+    async function saveProfileConfig() {
+        const payload = {
+            display_name: document.getElementById('cfgDisplayName').value,
+            bank_id: document.getElementById('cfgBankId').value,
+            account_no: document.getElementById('cfgAccNo').value,
+            account_name: document.getElementById('cfgAccName').value,
+            new_password: document.getElementById('cfgNewPass').value
+        };
+        const res = await fetch('/api/auth/update-profile', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+            bankModal.hide();
+            await checkAuth();
+            alert(data.message);
+        }
+    }
+
+    async function doLogout() {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.reload();
+    }
+
     async function loadStats() {
         const month = document.getElementById('searchMonth').value;
         try {
-            const res = await fetch(`/api/stats?month=${month}`);
+            const res = await fetch(`/api/stats?month=${month}&t=${Date.now()}`);
+            if (!res.ok) return;
             const data = await res.json();
             document.getElementById('statStudents').innerText = data.total_students;
             document.getElementById('statCompleted').innerText = data.completed_count + ' buổi';
@@ -1024,13 +1718,13 @@
 
     async function reloadAppData() {
         const btn = document.getElementById('btnReload');
-        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Tải...</span>';
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="d-none d-sm-inline">Tải...</span>';
         btn.disabled = true;
         await loadStudents();
         await loadStats();
-        calendar.refetchEvents();
+        if (calendar) calendar.refetchEvents();
         setTimeout(() => {
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> <span>Làm mới</span>';
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Làm mới</span>';
             btn.disabled = false;
         }, 400);
     }
@@ -1042,6 +1736,7 @@
         }
 
         editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        bankModal = new bootstrap.Modal(document.getElementById('bankModal'));
 
         const now = new Date();
         const curMonthStr = now.toISOString().slice(0, 7);
@@ -1050,6 +1745,17 @@
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         document.getElementById('endDate').value = lastDay.toISOString().slice(0, 10);
 
+        checkAuth();
+    });
+
+    function initCalendar() {
+        if (calendar) {
+            setTimeout(() => {
+                calendar.updateSize();
+                calendar.refetchEvents();
+            }, 100);
+            return;
+        }
         const isMobile = window.innerWidth < 768;
         const calendarEl = document.getElementById('calendar');
 
@@ -1080,9 +1786,7 @@
             }
         });
         calendar.render();
-        loadStudents();
-        loadStats();
-    });
+    }
 
     function setModalStatus(st) {
         currentModalStatus = st;
@@ -1103,7 +1807,7 @@
     async function loadStudents(selectedId = null) {
         try {
             const res = await fetch('/api/students?t=' + new Date().getTime());
-            if (!res.ok) throw new Error("Mã phản hồi: " + res.status);
+            if (!res.ok) return;
             cachedStudents = await res.json();
 
             const select = document.getElementById('lessonStudent');
@@ -1137,7 +1841,6 @@
                 syncSearchStudent(select.value);
             }
 
-            // Render danh sách học sinh trực quan ở Card 1
             if (listContainer) {
                 listContainer.innerHTML = cachedStudents.map(s => `
                     <div class="student-item d-flex align-items-center justify-content-between p-2">
@@ -1156,11 +1859,7 @@
                 `).join('');
             }
         } catch (e) {
-            console.error("Lỗi khi tải danh sách học sinh:", e);
-            const listContainer = document.getElementById('studentListContainer');
-            if (listContainer) {
-                listContainer.innerHTML = `<div class="text-danger text-center py-2 small"><i class="bi bi-wifi-off me-1"></i>Lỗi tải dữ liệu. Hãy chắc chắn server Flask đang chạy!</div>`;
-            }
+            console.error(e);
         }
     }
 
@@ -1171,7 +1870,6 @@
         document.getElementById('studentFee').value = formatVNNumber(found.fee);
         document.getElementById('studentColor').value = found.color;
 
-        // Chọn chip màu tương ứng
         document.querySelectorAll('.color-chip').forEach(c => {
             if (c.getAttribute('data-color').toLowerCase() === found.color.toLowerCase()) {
                 c.classList.add('active');
@@ -1254,10 +1952,10 @@
             const newId = (data.student && data.student.id) ? data.student.id : null;
             await loadStudents(newId);
             await loadStats();
+            if (calendar) calendar.refetchEvents();
             alert(`Đã lưu thông tin học sinh "${name}" thành công!`);
         } catch (err) {
-            console.error("Lỗi lưu học sinh:", err);
-            alert("Không thể kết nối đến máy chủ!\n\nVui lòng kiểm tra:\n1. Bạn đã chạy 'python app.py' trong terminal chưa?\n2. Bạn đang mở web bằng địa chỉ http://localhost:5000 (không mở trực tiếp file HTML qua file://)");
+            alert("Không thể kết nối đến máy chủ!");
         }
     }
 
@@ -1291,7 +1989,6 @@
 
         const result = await res.json();
 
-        // XỬ LÝ CẢNH BÁO TRÙNG LỊCH (Conflict Detection)
         if (res.status === 409 && result.has_conflict) {
             let conflictMsg = `⚠️ CẢNH BÁO TRÙNG LỊCH:\n${result.message}\n\n`;
             if (result.conflicts && result.conflicts.length > 0) {
@@ -1343,7 +2040,6 @@
         await loadStats();
     }
 
-    // TÍNH TIỀN & TẠO PHIẾU HỌC PHÍ
     async function calculateInvoice() {
         const name = document.getElementById('searchStudentSelect').value;
         const month = document.getElementById('searchMonth').value;
@@ -1357,6 +2053,7 @@
         currentInvoiceData = data;
 
         document.getElementById('invoiceContainer').classList.remove('d-none');
+        document.getElementById('invTutorName').innerText = data.tutor_name || '';
         document.getElementById('invName').innerText = data.student_name;
         const [year, m] = data.month.split('-');
         document.getElementById('invMonth').innerText = `Tháng ${m}/${year}`;
@@ -1408,11 +2105,9 @@
         const qrImg = document.getElementById('qrImage');
         qrImg.removeAttribute('crossorigin');
 
-        // URL fallback trực tiếp
         const fallbackUrl = `https://img.vietqr.io/image/${data.bank.BANK_ID}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(accountName)}`;
         qrImg.src = fallbackUrl;
 
-        // Gọi VietQR API để lấy DataURL PNG thực sự (đảm bảo html2canvas chụp không bao giờ bị trắng)
         try {
             fetch('https://api.vietqr.io/v2/generate', {
                 method: 'POST',
@@ -1461,7 +2156,6 @@
         if (previewModal) previewModal.show();
     }
 
-    // TẢI / LƯU ẢNH PHIẾU HỌC PHÍ (TỐI ƯU CHO CẢ ĐIỆN THOẠI & MÁY TÍNH)
     async function downloadInvoiceImage() {
         if (!currentInvoiceData) return alert("Chưa có thông tin phiếu học phí!");
         const invoiceEl = document.getElementById('invoiceResult');
@@ -1474,7 +2168,6 @@
         }
 
         try {
-            // Đảm bảo ảnh QR tải xong
             const qrImg = document.getElementById('qrImage');
             if (qrImg && !qrImg.complete) {
                 await new Promise(r => {
@@ -1484,7 +2177,6 @@
                 });
             }
 
-            // Đợi 200ms để DOM ổn định
             await new Promise(r => setTimeout(r, 200));
 
             const canvas = await html2canvas(invoiceEl, {
@@ -1500,7 +2192,6 @@
             const fileName = `Phieu_Hoc_Phi_${sanitizedName}_${currentInvoiceData.month || ''}.png`;
             const dataUrl = canvas.toDataURL('image/png');
 
-            // 1. Thử Web Share API (cực kỳ tiện trên iPhone Safari & Android: mở menu chia sẻ để Lưu ảnh / gửi Zalo)
             if (navigator.canShare && window.File) {
                 try {
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -1512,7 +2203,7 @@
                                 title: fileName,
                                 text: `Phiếu học phí của ${currentInvoiceData.student_name}`
                             });
-                            return; // Đã lưu hoặc chia sẻ xong qua menu điện thoại
+                            return;
                         }
                     }
                 } catch (shareErr) {
@@ -1521,13 +2212,11 @@
                 }
             }
 
-            // 2. Fallback: Nếu là điện thoại, mở popup xem ảnh để người dùng chạm giữ "Lưu hình ảnh"
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
             if (isMobileDevice) {
                 showImagePreviewModal(dataUrl, fileName);
             } else {
-                // Trên máy tính: tải trực tiếp file PNG
                 const link = document.createElement('a');
                 link.download = fileName;
                 link.href = dataUrl;
