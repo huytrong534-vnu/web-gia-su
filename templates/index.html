@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#4f46e5">
+    <title>Sổ Tay Lịch Gia Sư</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- FullCalendar & Html2Canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --danger-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            --bg-body: #f8fafc;
+            --card-border: #f1f5f9;
+            --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.02);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #1e293b;
+            padding-bottom: calc(24px + var(--safe-bottom));
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 14px 20px;
+            box-shadow: 0 4px 20px -2px rgba(79, 70, 229, 0.35);
+        }
+        .header-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+        .btn-reload {
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 7px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-reload:hover {
+            background: rgba(255, 255, 255, 0.28);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* ===== STATS DASHBOARD ===== */
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -6px rgba(15, 23, 42, 0.08);
+        }
+        .stat-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        .stat-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
+        /* ===== CARDS & SECTIONS ===== */
+        .glass-card {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            position: relative;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+        .section-header i {
+            font-size: 1.15rem;
+        }
+
+        /* ===== FULLCALENDAR STYLING ===== */
+        #calendar {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+        }
+        .fc .fc-toolbar {
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px !important;
+        }
+        .fc .fc-toolbar-title {
+            font-size: 1.1rem !important;
+            font-weight: 800 !important;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
+        .fc .fc-button {
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+            font-weight: 700 !important;
+            font-size: 0.82rem !important;
+            padding: 7px 12px !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease !important;
+        }
+        .fc .fc-button:hover {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        .fc .fc-button-active, .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: #ffffff !important;
+        }
+        .fc-event {
+            border-radius: 8px !important;
+            padding: 4px 7px !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .fc-event:hover {
+            transform: scale(1.02);
+            filter: brightness(0.96);
+        }
+        .fc-theme-standard th {
+            padding: 8px 0 !important;
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            color: #475569 !important;
+            background: #f8fafc;
+            border-color: #f1f5f9 !important;
+        }
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: #f1f5f9 !important;
+        }
+
+        /* Status legend pills */
+        .legend-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            color: #475569;
+        }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* ===== INPUTS & BUTTONS ===== */
+        .form-label-custom {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .form-control, .form-select {
+            border-radius: 11px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 10px 14px;
+            border: 1.5px solid #e2e8f0;
+            background-color: #f8fafc;
+            color: #0f172a;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .btn-gradient-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 11px 18px;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient-primary:hover {
+            color: white;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+            transform: translateY(-1px);
+        }
+        .student-item {
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 10px;
+        }
+        .student-item:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+        }
+        .btn-gradient-success {
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 11px 18px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient-success:hover {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+        .btn-gradient-danger {
+            background: var(--danger-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 11px 18px;
+            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient-danger:hover {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(244, 63, 94, 0.4);
+        }
+
+        /* Color Picker Chips */
+        .color-palette {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-chip {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .color-chip:hover {
+            transform: scale(1.15);
+        }
+        .color-chip.active {
+            border-color: #0f172a;
+            transform: scale(1.18);
+        }
+
+        /* Weekday Picker */
+        .weekday-grid {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .weekday-grid label {
+            width: 42px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .weekday-grid input[type="checkbox"] { display: none; }
+        .weekday-grid input[type="checkbox"]:checked + label {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 3px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        /* ===== INVOICE RECEIPT (Statement Styling) ===== */
+        #invoiceResult {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 24px 20px;
+            box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.08);
+            position: relative;
+        }
+        .invoice-badge-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px dashed #e2e8f0;
+        }
+        .invoice-badge-header h4 {
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        .invoice-meta-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+        .receipt-table {
+            width: 100%;
+            font-size: 0.82rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 16px;
+            table-layout: fixed;
+        }
+        .receipt-table th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+        }
+        .receipt-table th:first-child { border-radius: 8px 0 0 8px; }
+        .receipt-table th:last-child { border-radius: 0 8px 8px 0; }
+        .receipt-table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            vertical-align: middle;
+            word-break: break-word;
+        }
+        .receipt-table tr.row-cancelled td {
+            background-color: #fafbfc;
+        }
+        .badge-status-completed {
+            display: inline-flex;
+            align-items: center;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-status-makeup {
+            display: inline-flex;
+            align-items: center;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-status-cancelled {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-status-scheduled {
+            display: inline-flex;
+            align-items: center;
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .invoice-total-card {
+            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+            border: 1.5px dashed #f43f5e;
+            border-radius: 14px;
+            padding: 14px 18px;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .qr-card-box {
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            text-align: center;
+        }
+        .qr-card-box img {
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border: 3px solid #ffffff;
+            max-width: 180px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-content {
+            border-radius: 22px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+        .modal-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 18px 24px;
+        }
+        .status-card-btn {
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: #475569;
+        }
+        .status-card-btn.active-completed {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #065f46;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+        .status-card-btn.active-scheduled {
+            background: #eef2ff;
+            border-color: #4f46e5;
+            color: #3730a3;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+        }
+        .status-card-btn.active-cancelled {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+        .status-card-btn.active-makeup {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #92400e;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body * { visibility: hidden; }
+            #invoiceResult, #invoiceResult * { visibility: visible; }
+            #invoiceResult {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 10px !important;
+            }
+            .no-print { display: none !important; }
+            .app-header { display: none !important; }
+        }
+
+        @media (max-width: 767.98px) {
+            .app-header { padding: 10px 14px; }
+            .header-title { font-size: 0.92rem; }
+            .glass-card { padding: 16px; border-radius: 16px; }
+            #calendar { padding: 8px; border-radius: 16px; }
+            .fc .fc-toolbar { gap: 6px !important; margin-bottom: 10px !important; }
+            .fc .fc-toolbar-title { font-size: 0.9rem !important; }
+            .fc .fc-button { padding: 4px 7px !important; font-size: 0.74rem !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER BAR ===== -->
+<header class="app-header no-print">
+    <div class="d-flex justify-content-between align-items-center max-w-7xl mx-auto">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-mortarboard-fill fs-5"></i>
+            <span class="header-title">SỔ TAY GIA SƯ & HỌC PHÍ</span>
+        </div>
+        <button id="btnReload" onclick="reloadAppData()" class="btn-reload d-flex align-items-center gap-1">
+            <i class="bi bi-arrow-clockwise"></i> <span>Làm mới</span>
+        </button>
+    </div>
+</header>
+
+<div class="container-fluid px-3 px-md-4 py-3">
+
+    <!-- Cảnh báo nếu mở nhầm qua file:// -->
+    <div id="fileProtocolAlert" class="alert alert-danger d-none mb-3 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+        <strong>Chú ý:</strong> Bạn đang mở trang web trực tiếp qua tệp tin cục bộ (đường dẫn <code>file:///</code>). 
+        Trình duyệt chặn kết nối API nên <strong>không thể lưu được dữ liệu</strong>! 
+        Vui lòng mở terminal chạy lệnh <code>python app.py</code> và truy cập qua địa chỉ: 
+        <a href="http://localhost:5000" class="alert-link fw-bold text-decoration-underline">http://localhost:5000</a>
+    </div>
+
+    <!-- ===== DASHBOARD STATS BAR ===== -->
+    <div class="row g-2 g-md-3 mb-3 no-print">
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--primary-gradient);">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Học sinh</div>
+                    <div class="stat-value" id="statStudents">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--success-gradient);">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Đã dạy tháng này</div>
+                    <div class="stat-value text-success" id="statCompleted">0 buổi</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Tổng lịch tháng</div>
+                    <div class="stat-value" id="statTotalLessons">0 buổi</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--danger-gradient);">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Thu nhập đã đạt</div>
+                    <div class="stat-value text-danger" id="statRevenue">0 đ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- ===== CALENDAR COLUMN ===== -->
+        <div class="col-xl-8 col-lg-7 order-1 order-lg-2 no-print">
+            <!-- Legend Badges -->
+            <div class="d-flex justify-content-center flex-wrap gap-2 mb-2">
+                <span class="legend-pill"><span class="legend-dot" style="background: #4f46e5;"></span> Chưa dạy</span>
+                <span class="legend-pill"><span class="legend-dot" style="background: #10b981;"></span> Đã hoàn thành (✓)</span>
+                <span class="legend-pill"><span class="legend-dot" style="background: #64748b;"></span> Học sinh nghỉ (✕)</span>
+                <span class="legend-pill"><span class="legend-dot" style="background: #f59e0b;"></span> Dạy bù (↻)</span>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendar"></div>
+        </div>
+
+        <!-- ===== SIDEBAR TOOLS ===== -->
+        <div class="col-xl-4 col-lg-5 order-2 order-lg-1">
+
+            <!-- Card 1: Cài đặt học sinh & Màu sắc -->
+            <div class="glass-card mb-3 no-print">
+                <div class="section-header text-primary">
+                    <i class="bi bi-person-fill-gear"></i>
+                    <span>1. Cài đặt Học sinh & Học phí</span>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-7">
+                        <label class="form-label-custom">Tên học sinh</label>
+                        <input type="text" id="studentName" class="form-control" placeholder="VD: Minh Anh">
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label-custom">Đơn giá/buổi</label>
+                        <input type="text" id="studentFee" class="form-control" placeholder="200.000" oninput="formatCurrencyInput(this)">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-custom">Màu nhận diện lịch:</label>
+                    <div class="color-palette">
+                        <span class="color-chip active" data-color="#4f46e5" style="background:#4f46e5" onclick="selectStudentColor(this)" title="Indigo"></span>
+                        <span class="color-chip" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectStudentColor(this)" title="Violet"></span>
+                        <span class="color-chip" data-color="#10b981" style="background:#10b981" onclick="selectStudentColor(this)" title="Emerald"></span>
+                        <span class="color-chip" data-color="#f59e0b" style="background:#f59e0b" onclick="selectStudentColor(this)" title="Amber"></span>
+                        <span class="color-chip" data-color="#f43f5e" style="background:#f43f5e" onclick="selectStudentColor(this)" title="Rose"></span>
+                        <span class="color-chip" data-color="#06b6d4" style="background:#06b6d4" onclick="selectStudentColor(this)" title="Cyan"></span>
+                    </div>
+                    <input type="hidden" id="studentColor" value="#4f46e5">
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <button onclick="saveStudent()" id="btnSaveStudent" class="btn btn-gradient-primary w-100">
+                        <i class="bi bi-check2-circle me-1"></i> Lưu thông tin học sinh
+                    </button>
+                    <button onclick="resetStudentForm()" id="btnCancelEdit" class="btn btn-outline-secondary d-none" type="button" title="Hủy sửa và nhập mới">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Danh sách học sinh đã lưu -->
+                <div class="border-top pt-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="form-label-custom m-0"><i class="bi bi-people me-1"></i>Danh sách học sinh (<span id="studentCountBadge">0</span>)</span>
+                        <small class="text-muted" style="font-size: 0.72rem;">Bấm để sửa hoặc xóa</small>
+                    </div>
+                    <div id="studentListContainer" class="d-flex flex-column gap-2" style="max-height: 190px; overflow-y: auto;">
+                        <div class="text-center text-muted py-2 small">Đang tải danh sách...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Thêm lịch dạy & Cảnh báo trùng lịch -->
+            <div class="glass-card mb-3 no-print">
+                <div class="section-header text-success">
+                    <i class="bi bi-calendar-plus-fill"></i>
+                    <span>2. Thêm lịch dạy</span>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label-custom">Chọn học sinh</label>
+                    <div class="input-group">
+                        <select id="lessonStudent" class="form-select" onchange="syncSearchStudent(this.value)"></select>
+                        <button onclick="deleteSelectedStudent()" class="btn btn-outline-danger" type="button" title="Xóa học sinh này">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label-custom">Ngày học</label>
+                        <input type="date" id="lessonDate" class="form-control">
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label-custom">Giờ vào</label>
+                        <input type="time" id="startTime" class="form-control" value="19:30">
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <label class="form-label-custom">Giờ tan</label>
+                        <input type="time" id="endTime" class="form-control" value="21:30">
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-2 pt-1">
+                    <input class="form-check-input" type="checkbox" id="isRecurring" onchange="toggleRecurring()" style="cursor: pointer;">
+                    <label class="form-check-label fw-bold small text-slate-700" for="isRecurring" style="cursor: pointer;">
+                        <i class="bi bi-arrow-repeat me-1 text-primary"></i> Lặp lại hàng tuần
+                    </label>
+                </div>
+
+                <!-- Box lặp lại -->
+                <div id="recurringBox" class="p-3 mb-2 rounded-3 border bg-light d-none">
+                    <label class="form-label-custom mb-1">Chọn thứ trong tuần:</label>
+                    <div class="weekday-grid mb-2">
+                        <div><input type="checkbox" class="wk-day" id="wd0" value="0"><label for="wd0">T2</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd1" value="1"><label for="wd1">T3</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd2" value="2"><label for="wd2">T4</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd3" value="3"><label for="wd3">T5</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd4" value="4"><label for="wd4">T6</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd5" value="5"><label for="wd5">T7</label></div>
+                        <div><input type="checkbox" class="wk-day" id="wd6" value="6"><label for="wd6">CN</label></div>
+                    </div>
+                    <label class="form-label-custom">Đến hết ngày:</label>
+                    <input type="date" id="endDate" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <input type="text" id="lessonNote" class="form-control" placeholder="Ghi chú bài học (không bắt buộc)">
+                </div>
+
+                <button onclick="addLesson()" class="btn btn-gradient-success w-100">
+                    <i class="bi bi-plus-lg me-1"></i> Thêm vào lịch
+                </button>
+            </div>
+
+            <!-- Card 3: Tính tiền & Phiếu học phí -->
+            <div class="glass-card">
+                <div class="section-header text-danger no-print">
+                    <i class="bi bi-receipt-cutoff"></i>
+                    <span>3. Tổng kết học phí cuối tháng</span>
+                </div>
+
+                <div class="row g-2 mb-2 no-print">
+                    <div class="col-7">
+                        <label class="form-label-custom">Học sinh</label>
+                        <select id="searchStudentSelect" class="form-select"></select>
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label-custom">Tháng</label>
+                        <input type="month" id="searchMonth" class="form-control">
+                    </div>
+                </div>
+
+                <div class="mb-3 no-print">
+                    <div class="alert alert-light border py-2 px-3 small text-muted d-flex align-items-center gap-2 mb-0" style="border-radius: 10px; font-size: 0.78rem;">
+                        <i class="bi bi-info-circle-fill text-primary fs-6"></i>
+                        <span>Phiếu tự động liệt kê các buổi <b>hoàn thành</b>, <b>dạy bù</b> và <b>buổi nghỉ</b> (buổi nghỉ không tính phí).</span>
+                    </div>
+                </div>
+
+                <button onclick="calculateInvoice()" class="btn btn-gradient-danger w-100 mb-3 no-print">
+                    <i class="bi bi-qr-code-scan me-1"></i> Tạo Phiếu Học Phí & Mã QR
+                </button>
+
+                <!-- KHUNG PHIẾU BÁO HỌC PHÍ (STATEMENT LUXURY) -->
+                <div id="invoiceContainer" class="d-none">
+                    <div id="invoiceResult">
+                        <div class="invoice-badge-header">
+                            <h4>PHIẾU BÁO HỌC PHÍ</h4>
+                            <div class="text-muted small mt-1">Sổ tay theo dõi giảng dạy gia sư</div>
+                        </div>
+
+                        <!-- Thông tin tóm tắt -->
+                        <div class="invoice-meta-box">
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <span class="text-muted">Học sinh:</span>
+                                    <div class="fw-bold text-primary fs-6" id="invName"></div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span class="text-muted">Kỳ học phí:</span>
+                                    <div class="fw-bold text-dark fs-6" id="invMonth"></div>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Đơn giá:</span>
+                                    <div class="fw-bold"><span id="invFee"></span> đ/buổi</div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span class="text-muted">Số buổi tính phí:</span>
+                                    <div class="fw-bold text-success fs-6"><span id="invBillableCount">0</span> buổi</div>
+                                </div>
+                            </div>
+                            <!-- Chi tiết phân loại các buổi -->
+                            <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top justify-content-between align-items-center" style="font-size: 0.76rem;">
+                                <span><i class="bi bi-check-circle-fill text-success me-1"></i>Hoàn thành: <b id="invCompletedCount">0</b></span>
+                                <span><i class="bi bi-arrow-repeat text-warning me-1"></i>Dạy bù: <b id="invMakeupCount">0</b></span>
+                                <span><i class="bi bi-x-circle text-muted me-1"></i>Nghỉ (0đ): <b id="invCancelledCount">0</b></span>
+                            </div>
+                        </div>
+
+                        <!-- Bảng chi tiết các buổi học -->
+                        <div class="table-responsive" style="overflow-x: visible;">
+                            <table class="receipt-table mb-2">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 38%;">Thứ & Ngày</th>
+                                        <th style="width: 27%;">Giờ học</th>
+                                        <th style="width: 35%; text-align: right;">Trạng thái / Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Hộp tổng tiền học phí -->
+                        <div class="invoice-total-card">
+                            <div class="fw-bold text-danger text-uppercase small" style="letter-spacing: 0.5px; font-size: 0.85rem;">
+                                TỔNG HỌC PHÍ CẦN ĐÓNG
+                            </div>
+                            <div class="small text-muted my-1" id="invTotalSubtext" style="font-size: 0.78rem;">
+                                (Tính 0 buổi = 0 hoàn thành + 0 dạy bù)
+                            </div>
+                            <div class="fw-bold text-danger fs-3 mt-1" style="white-space: nowrap; font-weight: 800;">
+                                <span id="invTotal">0</span> VNĐ
+                            </div>
+                        </div>
+
+                        <!-- Mã QR VietQR -->
+                        <div class="qr-card-box">
+                            <div class="small text-muted mb-2 fw-semibold">Quét mã QR để chuyển khoản nhanh:</div>
+                            <img id="qrImage" src="" alt="Mã VietQR" class="img-fluid mb-2">
+                            <div class="small text-secondary fw-medium" id="invBankInfo"></div>
+                        </div>
+                    </div>
+
+                    <!-- Nút thao tác: Tải ảnh PNG + In / PDF -->
+                    <div class="d-flex gap-2 mt-3 no-print">
+                        <button id="btnDownloadInvoice" onclick="downloadInvoiceImage()" class="btn btn-outline-primary flex-grow-1 fw-bold py-2" style="border-radius: 12px;">
+                            <i class="bi bi-download me-1"></i> Lưu / Tải ảnh phiếu
+                        </button>
+                        <button onclick="window.print()" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 12px;">
+                            <i class="bi bi-printer me-1"></i> In / PDF
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL CHI TIẾT & TRẠNG THÁI BUỔI HỌC ===== -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold text-slate-800">
+                    <i class="bi bi-pencil-square text-primary me-1"></i>
+                    Buổi học: <span id="editStudentName" class="text-primary"></span>
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="editLessonId">
+
+                <label class="form-label-custom mb-2">Trạng thái buổi học hôm nay:</label>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="status-card-btn" id="stCompleted" onclick="setModalStatus('completed')">
+                            ✓ Đã hoàn thành
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="status-card-btn" id="stScheduled" onclick="setModalStatus('scheduled')">
+                            ● Chưa dạy
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="status-card-btn" id="stCancelled" onclick="setModalStatus('cancelled')">
+                            ✕ Học sinh nghỉ
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="status-card-btn" id="stMakeup" onclick="setModalStatus('makeup')">
+                            ↻ Buổi dạy bù
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label-custom">Ngày học:</label>
+                    <input type="date" id="editDate" class="form-control">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label-custom">Giờ vào:</label>
+                        <input type="time" id="editStart" class="form-control">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label-custom">Giờ tan:</label>
+                        <input type="time" id="editEnd" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label-custom">Ghi chú bài học:</label>
+                    <input type="text" id="editNote" class="form-control" placeholder="VD: Luyện giải đề số 5">
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between p-3 bg-light border-0">
+                <button onclick="deleteLesson()" class="btn btn-outline-danger fw-semibold px-3" style="border-radius: 10px;">
+                    <i class="bi bi-trash3 me-1"></i> Xóa buổi này
+                </button>
+                <button onclick="updateLesson()" class="btn btn-gradient-primary px-4">
+                    <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL XEM & LƯU ẢNH PHIẾU HỌC PHÍ TRÊN ĐIỆN THOẠI ===== -->
+<div class="modal fade" id="previewImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+            <div class="modal-header border-0 pb-0" style="background: #f8fafc;">
+                <h6 class="modal-title fw-bold text-slate-800 d-flex align-items-center gap-2">
+                    <i class="bi bi-image text-primary"></i> Phiếu Học Phí Đã Tạo
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3 text-center" style="background: #f8fafc;">
+                <div class="alert alert-primary py-2 px-3 small text-start mb-2" style="border-radius: 12px; font-size: 0.82rem;">
+                    <i class="bi bi-phone-fill me-1"></i> <strong>Trên điện thoại:</strong> Nhấn giữ vào ảnh bên dưới 1-2 giây rồi chọn <b>"Lưu hình ảnh"</b> (hoặc <b>"Chia sẻ"</b> gửi qua Zalo).
+                </div>
+                <div class="text-center p-2 bg-white rounded-3 shadow-sm border mb-3">
+                    <img id="previewImageEl" src="" alt="Phiếu học phí" class="img-fluid rounded" style="max-height: 55vh; object-fit: contain; width: 100%;">
+                </div>
+                <div class="d-flex gap-2">
+                    <a id="previewDownloadBtn" href="#" download="" class="btn btn-primary flex-grow-1 fw-bold py-2" style="border-radius: 12px;">
+                        <i class="bi bi-download me-1"></i> Tải ảnh về máy
+                    </a>
+                    <button type="button" class="btn btn-secondary fw-semibold py-2 px-3" data-bs-dismiss="modal" style="border-radius: 12px;">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let calendar;
+    let editModal;
+    let currentModalStatus = 'scheduled';
+    let cachedStudents = [];
+    let currentInvoiceData = null;
+
+    function formatVNNumber(num) {
+        return Number(num).toLocaleString('vi-VN');
+    }
+
+    function formatCurrencyInput(input) {
+        let rawValue = input.value.replace(/\D/g, '');
+        if (!rawValue) { input.value = ''; return; }
+        input.value = Number(rawValue).toLocaleString('vi-VN');
+    }
+
+    function selectStudentColor(el) {
+        document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('studentColor').value = el.getAttribute('data-color');
+    }
+
+    async function loadStats() {
+        const month = document.getElementById('searchMonth').value;
+        try {
+            const res = await fetch(`/api/stats?month=${month}`);
+            const data = await res.json();
+            document.getElementById('statStudents').innerText = data.total_students;
+            document.getElementById('statCompleted').innerText = data.completed_count + ' buổi';
+            document.getElementById('statTotalLessons').innerText = data.total_lessons + ' buổi';
+            document.getElementById('statRevenue').innerText = formatVNNumber(data.estimated_revenue) + ' đ';
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async function reloadAppData() {
+        const btn = document.getElementById('btnReload');
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Tải...</span>';
+        btn.disabled = true;
+        await loadStudents();
+        await loadStats();
+        calendar.refetchEvents();
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> <span>Làm mới</span>';
+            btn.disabled = false;
+        }, 400);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.protocol === 'file:') {
+            const alertEl = document.getElementById('fileProtocolAlert');
+            if (alertEl) alertEl.classList.remove('d-none');
+        }
+
+        editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+        const now = new Date();
+        const curMonthStr = now.toISOString().slice(0, 7);
+        document.getElementById('searchMonth').value = curMonthStr;
+        document.getElementById('lessonDate').value = now.toISOString().slice(0, 10);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        document.getElementById('endDate').value = lastDay.toISOString().slice(0, 10);
+
+        const isMobile = window.innerWidth < 768;
+        const calendarEl = document.getElementById('calendar');
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+            locale: 'vi',
+            firstDay: 1,
+            headerToolbar: isMobile
+                ? { left: 'prev,next', center: 'title', right: 'timeGridDay,timeGridWeek,dayGridMonth' }
+                : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+            slotMinTime: '07:00:00',
+            slotMaxTime: '22:30:00',
+            allDaySlot: false,
+            height: isMobile ? 'auto' : 680,
+            expandRows: !isMobile,
+            events: '/api/lessons',
+            eventClick: function(info) {
+                const props = info.event.extendedProps;
+                document.getElementById('editLessonId').value = info.event.id;
+                document.getElementById('editStudentName').innerText = props.student_name;
+                document.getElementById('editDate').value = props.date;
+                document.getElementById('editStart').value = props.start_time;
+                document.getElementById('editEnd').value = props.end_time;
+                document.getElementById('editNote').value = props.note || '';
+
+                setModalStatus(props.status || (props.is_completed ? 'completed' : 'scheduled'));
+                editModal.show();
+            }
+        });
+        calendar.render();
+        loadStudents();
+        loadStats();
+    });
+
+    function setModalStatus(st) {
+        currentModalStatus = st;
+        ['stCompleted', 'stScheduled', 'stCancelled', 'stMakeup'].forEach(id => {
+            document.getElementById(id).className = 'status-card-btn';
+        });
+        if (st === 'completed') document.getElementById('stCompleted').classList.add('active-completed');
+        else if (st === 'scheduled') document.getElementById('stScheduled').classList.add('active-scheduled');
+        else if (st === 'cancelled') document.getElementById('stCancelled').classList.add('active-cancelled');
+        else if (st === 'makeup') document.getElementById('stMakeup').classList.add('active-makeup');
+    }
+
+    function toggleRecurring() {
+        const isChecked = document.getElementById('isRecurring').checked;
+        document.getElementById('recurringBox').classList.toggle('d-none', !isChecked);
+    }
+
+    async function loadStudents(selectedId = null) {
+        try {
+            const res = await fetch('/api/students?t=' + new Date().getTime());
+            if (!res.ok) throw new Error("Mã phản hồi: " + res.status);
+            cachedStudents = await res.json();
+
+            const select = document.getElementById('lessonStudent');
+            const searchSelect = document.getElementById('searchStudentSelect');
+            const listContainer = document.getElementById('studentListContainer');
+            const countBadge = document.getElementById('studentCountBadge');
+            if (countBadge) countBadge.innerText = cachedStudents.length;
+
+            if (cachedStudents.length === 0) {
+                select.innerHTML = `<option value="">-- Chưa có học sinh --</option>`;
+                searchSelect.innerHTML = `<option value="">-- Chưa có học sinh --</option>`;
+                if (listContainer) {
+                    listContainer.innerHTML = `<div class="text-center text-muted py-2 small">Chưa có học sinh nào. Nhập tên và giá bên trên để thêm.</div>`;
+                }
+                return;
+            }
+
+            const optionsHtml = cachedStudents.map(s =>
+                `<option value="${s.id}">${s.name} (${formatVNNumber(s.fee)}đ/buổi)</option>`
+            ).join('');
+
+            select.innerHTML = optionsHtml;
+            searchSelect.innerHTML = cachedStudents.map(s =>
+                `<option value="${s.name}">${s.name}</option>`
+            ).join('');
+
+            if (selectedId) {
+                select.value = selectedId;
+                syncSearchStudent(selectedId);
+            } else if (select.value) {
+                syncSearchStudent(select.value);
+            }
+
+            // Render danh sách học sinh trực quan ở Card 1
+            if (listContainer) {
+                listContainer.innerHTML = cachedStudents.map(s => `
+                    <div class="student-item d-flex align-items-center justify-content-between p-2">
+                        <div class="d-flex align-items-center gap-2 text-truncate" style="cursor: pointer; flex: 1;" onclick="editStudent(${s.id})" title="Nhấp để sửa thông tin">
+                            <span class="rounded-circle d-inline-block flex-shrink-0" style="width: 12px; height: 12px; background: ${s.color};"></span>
+                            <div class="text-truncate">
+                                <span class="fw-bold text-dark d-block text-truncate" style="font-size: 0.88rem;">${s.name}</span>
+                                <small class="text-muted" style="font-size: 0.76rem;">${formatVNNumber(s.fee)} đ/buổi</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0 ms-2">
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.78rem;" onclick="editStudent(${s.id})" title="Sửa học phí/màu"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.78rem;" onclick="deleteStudentById(${s.id}, '${s.name.replace(/'/g, "\\'")}')" title="Xóa học sinh"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (e) {
+            console.error("Lỗi khi tải danh sách học sinh:", e);
+            const listContainer = document.getElementById('studentListContainer');
+            if (listContainer) {
+                listContainer.innerHTML = `<div class="text-danger text-center py-2 small"><i class="bi bi-wifi-off me-1"></i>Lỗi tải dữ liệu. Hãy chắc chắn server Flask đang chạy!</div>`;
+            }
+        }
+    }
+
+    function editStudent(id) {
+        const found = cachedStudents.find(s => s.id === id);
+        if (!found) return;
+        document.getElementById('studentName').value = found.name;
+        document.getElementById('studentFee').value = formatVNNumber(found.fee);
+        document.getElementById('studentColor').value = found.color;
+
+        // Chọn chip màu tương ứng
+        document.querySelectorAll('.color-chip').forEach(c => {
+            if (c.getAttribute('data-color').toLowerCase() === found.color.toLowerCase()) {
+                c.classList.add('active');
+            } else {
+                c.classList.remove('active');
+            }
+        });
+
+        document.getElementById('btnSaveStudent').innerHTML = '<i class="bi bi-check2-circle me-1"></i> Cập nhật học sinh';
+        document.getElementById('btnCancelEdit').classList.remove('d-none');
+        document.getElementById('studentName').focus();
+    }
+
+    function resetStudentForm() {
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentFee').value = '';
+        document.getElementById('btnSaveStudent').innerHTML = '<i class="bi bi-check2-circle me-1"></i> Lưu thông tin học sinh';
+        document.getElementById('btnCancelEdit').classList.add('d-none');
+    }
+
+    function syncSearchStudent(studentId) {
+        const found = cachedStudents.find(s => s.id == studentId);
+        if (found) {
+            document.getElementById('searchStudentSelect').value = found.name;
+        }
+    }
+
+    async function deleteStudentById(studentId, studentName) {
+        if (!confirm(`Bạn có chắc chắn muốn xóa học sinh "${studentName}" cùng toàn bộ lịch học liên quan không?`)) return;
+
+        try {
+            const res = await fetch(`/api/students/${studentId}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (res.ok) {
+                resetStudentForm();
+                await loadStudents();
+                await loadStats();
+                calendar.refetchEvents();
+                alert(result.message);
+            } else {
+                alert(result.error || "Không thể xóa học sinh này!");
+            }
+        } catch(e) {
+            alert("Lỗi kết nối khi xóa: " + e.message);
+        }
+    }
+
+    async function deleteSelectedStudent() {
+        const select = document.getElementById('lessonStudent');
+        const studentId = select.value;
+        if (!studentId) return alert("Hiện không có học sinh nào để xóa!");
+
+        const studentText = select.options[select.selectedIndex].text;
+        deleteStudentById(studentId, studentText);
+    }
+
+    async function saveStudent() {
+        const name = document.getElementById('studentName').value.trim();
+        const rawFee = document.getElementById('studentFee').value.replace(/\D/g, '');
+        const color = document.getElementById('studentColor').value;
+
+        if (!name || !rawFee) {
+            return alert("Vui lòng nhập tên học sinh và học phí!");
+        }
+
+        try {
+            const res = await fetch('/api/students', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, fee_per_session: rawFee, color})
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                alert("Không thể lưu: " + (data.error || "Lỗi máy chủ!"));
+                return;
+            }
+
+            resetStudentForm();
+            const newId = (data.student && data.student.id) ? data.student.id : null;
+            await loadStudents(newId);
+            await loadStats();
+            alert(`Đã lưu thông tin học sinh "${name}" thành công!`);
+        } catch (err) {
+            console.error("Lỗi lưu học sinh:", err);
+            alert("Không thể kết nối đến máy chủ!\n\nVui lòng kiểm tra:\n1. Bạn đã chạy 'python app.py' trong terminal chưa?\n2. Bạn đang mở web bằng địa chỉ http://localhost:5000 (không mở trực tiếp file HTML qua file://)");
+        }
+    }
+
+    async function addLesson(ignoreConflict = false) {
+        const student_id = document.getElementById('lessonStudent').value;
+        const date = document.getElementById('lessonDate').value;
+        const start_time = document.getElementById('startTime').value;
+        const end_time = document.getElementById('endTime').value;
+        const note = document.getElementById('lessonNote').value;
+        const is_recurring = document.getElementById('isRecurring').checked;
+        const end_date = document.getElementById('endDate').value;
+
+        if (!student_id || !date) return alert("Vui lòng chọn học sinh và ngày học!");
+
+        let weekdays = [];
+        if (is_recurring) {
+            document.querySelectorAll('.wk-day:checked').forEach(cb => weekdays.push(cb.value));
+            if (weekdays.length === 0) return alert("Vui lòng tích chọn ít nhất 1 thứ trong tuần!");
+        }
+
+        const payload = {
+            student_id, date, start_time, end_time, note,
+            is_recurring, end_date, weekdays, ignore_conflict: ignoreConflict
+        };
+
+        const res = await fetch('/api/lessons', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        // XỬ LÝ CẢNH BÁO TRÙNG LỊCH (Conflict Detection)
+        if (res.status === 409 && result.has_conflict) {
+            let conflictMsg = `⚠️ CẢNH BÁO TRÙNG LỊCH:\n${result.message}\n\n`;
+            if (result.conflicts && result.conflicts.length > 0) {
+                result.conflicts.forEach(c => {
+                    conflictMsg += `• Ngày ${c.date} (${c.time}): Đang dạy ${c.student_name}\n`;
+                });
+            }
+            conflictMsg += `\nBạn có muốn VẪN LƯU buổi học này không?`;
+            if (confirm(conflictMsg)) {
+                return addLesson(true);
+            }
+            return;
+        }
+
+        if (res.ok) {
+            document.getElementById('lessonNote').value = '';
+            calendar.refetchEvents();
+            await loadStats();
+            alert(result.message);
+        } else {
+            alert(result.message || "Lỗi khi lưu lịch!");
+        }
+    }
+
+    async function updateLesson() {
+        const id = document.getElementById('editLessonId').value;
+        await fetch(`/api/lessons/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                date: document.getElementById('editDate').value,
+                start_time: document.getElementById('editStart').value,
+                end_time: document.getElementById('editEnd').value,
+                note: document.getElementById('editNote').value,
+                status: currentModalStatus
+            })
+        });
+        editModal.hide();
+        calendar.refetchEvents();
+        await loadStats();
+    }
+
+    async function deleteLesson() {
+        if (!confirm("Xác nhận xóa buổi học này khỏi lịch?")) return;
+        const id = document.getElementById('editLessonId').value;
+        await fetch(`/api/lessons/${id}`, { method: 'DELETE' });
+        editModal.hide();
+        calendar.refetchEvents();
+        await loadStats();
+    }
+
+    // TÍNH TIỀN & TẠO PHIẾU HỌC PHÍ
+    async function calculateInvoice() {
+        const name = document.getElementById('searchStudentSelect').value;
+        const month = document.getElementById('searchMonth').value;
+
+        if (!name || !month) return alert("Vui lòng chọn học sinh và tháng!");
+
+        const res = await fetch(`/api/invoice?name=${encodeURIComponent(name)}&month=${month}`);
+        const data = await res.json();
+
+        if (!res.ok) return alert(data.error);
+        currentInvoiceData = data;
+
+        document.getElementById('invoiceContainer').classList.remove('d-none');
+        document.getElementById('invName').innerText = data.student_name;
+        const [year, m] = data.month.split('-');
+        document.getElementById('invMonth').innerText = `Tháng ${m}/${year}`;
+        document.getElementById('invFee').innerText = formatVNNumber(data.fee_per_session);
+        document.getElementById('invBillableCount').innerText = data.billable_sessions;
+        document.getElementById('invCompletedCount').innerText = data.completed_count;
+        document.getElementById('invMakeupCount').innerText = data.makeup_count;
+        document.getElementById('invCancelledCount').innerText = data.cancelled_count;
+        document.getElementById('invTotal').innerText = formatVNNumber(data.total_amount);
+        document.getElementById('invTotalSubtext').innerText = `(Tính ${data.billable_sessions} buổi = ${data.completed_count} hoàn thành + ${data.makeup_count} dạy bù)`;
+
+        const tbody = document.getElementById('invTableBody');
+        tbody.innerHTML = data.sessions.map(s => {
+            let badgeHtml = '';
+            let rowClass = '';
+            if (s.status === 'completed') {
+                badgeHtml = `<span class="badge-status-completed"><i class="bi bi-check-circle-fill me-1"></i>Hoàn thành</span>`;
+            } else if (s.status === 'makeup') {
+                badgeHtml = `<span class="badge-status-makeup"><i class="bi bi-arrow-repeat me-1"></i>Dạy bù (+1)</span>`;
+            } else if (s.status === 'cancelled') {
+                badgeHtml = `<span class="badge-status-cancelled"><i class="bi bi-x-circle me-1"></i>Nghỉ (0đ)</span>`;
+                rowClass = 'row-cancelled';
+            } else {
+                badgeHtml = `<span class="badge-status-scheduled">Chưa dạy</span>`;
+            }
+
+            return `
+                <tr class="${rowClass}">
+                    <td>
+                        <div class="fw-bold text-slate-800" style="font-size: 0.82rem;">${s.full_date}</div>
+                    </td>
+                    <td>
+                        <span class="text-secondary small fw-medium">${s.time}</span>
+                    </td>
+                    <td class="text-end">
+                        <div>${badgeHtml}</div>
+                        ${s.note ? `<div class="small text-muted mt-1 fst-italic" style="font-size: 0.74rem;">${s.note}</div>` : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        const transferNote = `Hoc phi T${m} ${year} cua ${data.student_name}`;
+        const binCode = (data.bank && data.bank.BIN) ? data.bank.BIN : '970422';
+        const accountNo = data.bank.ACCOUNT_NO;
+        const accountName = data.bank.ACCOUNT_NAME;
+        const amount = data.total_amount;
+
+        const qrImg = document.getElementById('qrImage');
+        qrImg.removeAttribute('crossorigin');
+
+        // URL fallback trực tiếp
+        const fallbackUrl = `https://img.vietqr.io/image/${data.bank.BANK_ID}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(transferNote)}&accountName=${encodeURIComponent(accountName)}`;
+        qrImg.src = fallbackUrl;
+
+        // Gọi VietQR API để lấy DataURL PNG thực sự (đảm bảo html2canvas chụp không bao giờ bị trắng)
+        try {
+            fetch('https://api.vietqr.io/v2/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accountNo: accountNo,
+                    accountName: accountName,
+                    acqId: binCode,
+                    amount: amount,
+                    addInfo: transferNote,
+                    format: 'text',
+                    template: 'compact2'
+                })
+            })
+            .then(res => res.json())
+            .then(resJson => {
+                if (resJson && resJson.code === '00' && resJson.data && resJson.data.qrDataURL) {
+                    qrImg.src = resJson.data.qrDataURL;
+                }
+            })
+            .catch(err => console.warn("Lỗi gọi VietQR API:", err));
+        } catch(e) {
+            console.warn(e);
+        }
+
+        document.getElementById('invBankInfo').innerText = `STK: ${data.bank.ACCOUNT_NO} (${data.bank.BANK_ID}) - ${data.bank.ACCOUNT_NAME}`;
+
+        setTimeout(() => {
+            document.getElementById('invoiceContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    let previewModal = null;
+    function showImagePreviewModal(dataUrl, fileName) {
+        if (!previewModal) {
+            const modalEl = document.getElementById('previewImageModal');
+            if (modalEl) previewModal = new bootstrap.Modal(modalEl);
+        }
+        const img = document.getElementById('previewImageEl');
+        const dlBtn = document.getElementById('previewDownloadBtn');
+        if (img) img.src = dataUrl;
+        if (dlBtn) {
+            dlBtn.href = dataUrl;
+            dlBtn.download = fileName;
+        }
+        if (previewModal) previewModal.show();
+    }
+
+    // TẢI / LƯU ẢNH PHIẾU HỌC PHÍ (TỐI ƯU CHO CẢ ĐIỆN THOẠI & MÁY TÍNH)
+    async function downloadInvoiceImage() {
+        if (!currentInvoiceData) return alert("Chưa có thông tin phiếu học phí!");
+        const invoiceEl = document.getElementById('invoiceResult');
+        const btn = document.getElementById('btnDownloadInvoice');
+        const oldHtml = btn ? btn.innerHTML : '';
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Đang tạo ảnh...`;
+        }
+
+        try {
+            // Đảm bảo ảnh QR tải xong
+            const qrImg = document.getElementById('qrImage');
+            if (qrImg && !qrImg.complete) {
+                await new Promise(r => {
+                    qrImg.onload = r;
+                    qrImg.onerror = r;
+                    setTimeout(r, 2000);
+                });
+            }
+
+            // Đợi 200ms để DOM ổn định
+            await new Promise(r => setTimeout(r, 200));
+
+            const canvas = await html2canvas(invoiceEl, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                height: invoiceEl.scrollHeight,
+                windowHeight: invoiceEl.scrollHeight
+            });
+
+            const sanitizedName = (currentInvoiceData.student_name || 'HocSinh').replace(/\s+/g, '_');
+            const fileName = `Phieu_Hoc_Phi_${sanitizedName}_${currentInvoiceData.month || ''}.png`;
+            const dataUrl = canvas.toDataURL('image/png');
+
+            // 1. Thử Web Share API (cực kỳ tiện trên iPhone Safari & Android: mở menu chia sẻ để Lưu ảnh / gửi Zalo)
+            if (navigator.canShare && window.File) {
+                try {
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    if (blob) {
+                        const file = new File([blob], fileName, { type: 'image/png' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: fileName,
+                                text: `Phiếu học phí của ${currentInvoiceData.student_name}`
+                            });
+                            return; // Đã lưu hoặc chia sẻ xong qua menu điện thoại
+                        }
+                    }
+                } catch (shareErr) {
+                    if (shareErr.name === 'AbortError') return;
+                    console.warn("Share API fallback:", shareErr);
+                }
+            }
+
+            // 2. Fallback: Nếu là điện thoại, mở popup xem ảnh để người dùng chạm giữ "Lưu hình ảnh"
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+            if (isMobileDevice) {
+                showImagePreviewModal(dataUrl, fileName);
+            } else {
+                // Trên máy tính: tải trực tiếp file PNG
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch(err) {
+            console.error("Lỗi xuất ảnh:", err);
+            alert("Có lỗi khi tạo ảnh phiếu! Bạn có thể dùng nút In / PDF hoặc chụp màn hình phiếu.");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
+        }
+    }
+</script>
+</body>
+</html>
