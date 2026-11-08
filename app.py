@@ -85,25 +85,25 @@ def init_database():
     if is_postgres:
         try:
             from sqlalchemy import inspect, text as sql_text
-            inspector = inspect(db.engine)
-            existing_tables = inspector.get_table_names()
-            need_reset = False
-            if 'student' in existing_tables:
-                col_names = [c['name'] for c in inspector.get_columns('student')]
-                if 'user_id' not in col_names:
+            with db.engine.connect() as conn:
+                inspector = inspect(conn)
+                existing_tables = inspector.get_table_names()
+                need_reset = False
+                if 'student' in existing_tables:
+                    col_names = [c['name'] for c in inspector.get_columns('student')]
+                    if 'user_id' not in col_names:
+                        need_reset = True
+                if 'user' not in existing_tables and '"user"' not in existing_tables:
                     need_reset = True
-            if 'user' not in existing_tables and '"user"' not in existing_tables:
-                need_reset = True
-                
-            if need_reset:
-                print('Dang don dep cac bang cu tren PostgreSQL...')
-                db.session.execute(sql_text('DROP TABLE IF EXISTS lesson CASCADE'))
-                db.session.execute(sql_text('DROP TABLE IF EXISTS student CASCADE'))
-                db.session.execute(sql_text('DROP TABLE IF EXISTS "user" CASCADE'))
-                db.session.commit()
+                    
+                if need_reset:
+                    print('Dang don dep cac bang cu tren PostgreSQL...')
+                    conn.execute(sql_text('DROP TABLE IF EXISTS lesson CASCADE'))
+                    conn.execute(sql_text('DROP TABLE IF EXISTS student CASCADE'))
+                    conn.execute(sql_text('DROP TABLE IF EXISTS "user" CASCADE'))
+                    conn.commit()
         except Exception as e:
             print('Luu y kiem tra bang cu:', e)
-            db.session.rollback()
 
     # 2. Tao bang
     db.create_all()
@@ -194,10 +194,16 @@ def init_database():
             huy.status = 'approved'
             db.session.commit()
     except Exception:
-        pass
+        db.session.rollback()
+    finally:
+        db.session.remove()
 
 with app.app_context():
     init_database()
+
+@app.route('/healthz')
+def healthz():
+    return jsonify({"status": "ok"}), 200
 
 def get_current_user():
     uid = session.get('user_id')
