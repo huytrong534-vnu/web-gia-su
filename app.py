@@ -1,4 +1,4 @@
-import os, functools
+import os, functools, re
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -745,91 +745,163 @@ def modify_lesson(lesson_id):
         db.session.commit()
         return jsonify({"message": "Đã cập nhật buổi học!"})
 
-# --- API TÍNH TIỀN CUỐI THÁNG (GẮN ĐÚNG MÃ QR CỦA GIA SƯ ĐÓ) ---
+# --- API TÍNH TIỀN CUỐI THÁNG (HỖ TRỢ ĐƠN LẺ HOẶC GỘP NHIỀU HỌC SINH / ONL-OFF CHUNG 1 QR) ---
 @app.route('/api/invoice', methods=['GET'])
 def calculate_invoice():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Vui lòng đăng nhập!"}), 401
 
+    month_query = request.args.get('month', '').strip()
+    if not month_query:
+        return jsonify({"error": "Vui lòng chọn tháng!"}), 400
+
+    student_ids_raw = request.args.get('student_ids', '').strip()
     name_query = request.args.get('name', '').strip()
-    month_query = request.args.get('month', '')
+    custom_name = request.args.get('custom_name', '').strip()
 
-    if not name_query or not month_query:
-        return jsonify({"error": "Vui lòng chọn học sinh và chọn tháng!"}), 400
+    students = []
+    if student_ids_raw:
+        try:
+            s_ids = [int(x) for x in student_ids_raw.split(',') if x.strip().isdigit()]
+            if s_ids:
+                found_map = {s.id: s for s in Student.query.filter(Student.user_id == user.id, Student.id.in_(s_ids)).all()}
+                students = [found_map[sid] for sid in s_ids if sid in found_map]
+        except Exception:
+            pass
 
-    student = Student.query.filter(
-        Student.user_id == user.id,
-        Student.name.ilike(f"%{name_query}%")
-    ).first()
-    if not student:
-        return jsonify({"error": "Không tìm thấy học sinh này!"}), 404
+    if not students and name_query:
+        student = Student.query.filter(
+            Student.user_id == user.id,
+            Student.name.ilike(f"%{name_query}%")
+        ).first()
+        if student:
+            students = [student]
 
-    lessons = Lesson.query.filter(
-        Lesson.student_id == student.id,
-        Lesson.date.like(f"{month_query}-%")
-    ).order_by(Lesson.date.asc(), Lesson.start_time.asc()).all()
+    if not students:
+        return jsonify({"error": "Vui lòng chọn học sinh cần tính học phí!"}), 400
 
     weekday_names = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
 
-    session_list = []
-    completed_count = 0
-    makeup_count = 0
-    cancelled_count = 0
-    scheduled_count = 0
+    all_sessions = []
+    students_breakdown = []
+    total_completed = 0
+    total_makeup = 0
+    total_cancelled = 0
+    total_scheduled = 0
+    total_amount = 0
 
-    for l in lessons:
-        dt = datetime.strptime(l.date, "%Y-%m-%d")
-        w_name = weekday_names[dt.weekday()]
-        full_date = f"{w_name}, {dt.strftime('%d/%m/%Y')}"
+    for st in students:
+        lessons = Lesson.query.filter(
+            Lesson.student_id == st.id,
+            Lesson.date.like(f"{month_query}-%")
+        ).order_by(Lesson.date.asc(), Lesson.start_time.asc()).all()
 
-        st = l.status or ('completed' if l.is_completed else 'scheduled')
+        st_completed = 0
+        st_makeup = 0
+        st_cancelled = 0
+        st_scheduled = 0
 
-        is_billed = False
-        if st == 'completed':
-            completed_count += 1
-            is_billed = True
-            st_text = 'Đã hoàn thành'
-        elif st == 'makeup':
-            makeup_count += 1
-            is_billed = True
-            st_text = 'Dạy bù'
-        elif st == 'cancelled':
-            cancelled_count += 1
+        for l in lessons:
+            try:
+                dt = datetime.strptime(l.date, "%Y-%m-%d")
+                w_name = weekday_names[dt.weekday()]
+                full_date = f"{w_name}, {dt.strftime('%d/%m/%Y')}"
+                date_str = dt.strftime("%d/%m/%Y")
+            except Exception:
+                full_date = l.date
+                date_str = l.date
+                w_name = ""
+
+            st_status = l.status or ('completed' if l.is_completed else 'scheduled')
             is_billed = False
-            st_text = 'Học sinh nghỉ'
-        else:
-            scheduled_count += 1
-            is_billed = False
-            st_text = 'Chưa dạy'
 
-        session_list.append({
-            "weekday": w_name,
-            "date": dt.strftime("%d/%m/%Y"),
-            "full_date": full_date,
-            "time": f"{l.start_time} - {l.end_time}",
-            "note": l.note or "",
-            "status": st,
-            "status_text": st_text,
-            "is_billed": is_billed
+            if st_status == 'completed':
+                st_completed += 1
+                is_billed = True
+                st_text = 'Đã hoàn thành'
+            elif st_status == 'makeup':
+                st_makeup += 1
+                is_billed = True
+                st_text = 'Dạy bù'
+            elif st_status == 'cancelled':
+                st_cancelled += 1
+                is_billed = False
+                st_text = 'Học sinh nghỉ'
+            else:
+                st_scheduled += 1
+                is_billed = False
+                st_text = 'Chưa dạy'
+
+            all_sessions.append({
+                "raw_date": l.date,
+                "raw_start_time": l.start_time or "00:00",
+                "weekday": w_name,
+                "date": date_str,
+                "full_date": full_date,
+                "time": f"{l.start_time} - {l.end_time}",
+                "note": l.note or "",
+                "status": st_status,
+                "status_text": st_text,
+                "is_billed": is_billed,
+                "student_id": st.id,
+                "student_name": st.name,
+                "student_color": st.color or "#0284c7",
+                "fee_per_session": st.fee_per_session
+            })
+
+        st_billable = st_completed + st_makeup
+        st_subtotal = st_billable * st.fee_per_session
+
+        total_completed += st_completed
+        total_makeup += st_makeup
+        total_cancelled += st_cancelled
+        total_scheduled += st_scheduled
+        total_amount += st_subtotal
+
+        students_breakdown.append({
+            "id": st.id,
+            "name": st.name,
+            "color": st.color or "#0284c7",
+            "fee_per_session": st.fee_per_session,
+            "completed_count": st_completed,
+            "makeup_count": st_makeup,
+            "cancelled_count": st_cancelled,
+            "scheduled_count": st_scheduled,
+            "billable_sessions": st_billable,
+            "subtotal": st_subtotal
         })
 
-    billable_sessions = completed_count + makeup_count
-    total_amount = billable_sessions * student.fee_per_session
+    all_sessions.sort(key=lambda s: (s["raw_date"], s["raw_start_time"]))
+    total_billable = total_completed + total_makeup
+    is_merged = (len(students) > 1)
+
+    if custom_name:
+        display_student_name = custom_name
+    elif not is_merged:
+        display_student_name = students[0].name
+    else:
+        clean_names = [re.sub(r'[\s\-_\/]*[\(\[]?\s*(off|onl|online|offline)\s*[\)\]]?\s*$', '', s.name, flags=re.IGNORECASE).strip() for s in students]
+        if len(set(clean_names)) == 1 and clean_names[0]:
+            display_student_name = clean_names[0]
+        else:
+            display_student_name = " & ".join([s.name for s in students])
 
     return jsonify({
         "tutor_name": user.display_name,
-        "student_name": student.name,
+        "student_name": display_student_name,
+        "is_merged": is_merged,
+        "students_breakdown": students_breakdown,
         "month": month_query,
-        "fee_per_session": student.fee_per_session,
-        "billable_sessions": billable_sessions,
-        "completed_count": completed_count,
-        "makeup_count": makeup_count,
-        "cancelled_count": cancelled_count,
-        "scheduled_count": scheduled_count,
-        "total_sessions": len(session_list),
+        "fee_per_session": students[0].fee_per_session if not is_merged else 0,
+        "billable_sessions": total_billable,
+        "completed_count": total_completed,
+        "makeup_count": total_makeup,
+        "cancelled_count": total_cancelled,
+        "scheduled_count": total_scheduled,
+        "total_sessions": len(all_sessions),
         "total_amount": total_amount,
-        "sessions": session_list,
+        "sessions": all_sessions,
         "bank": {
             "BANK_ID": user.bank_id or "MB",
             "BIN": user.bank_bin or "970422",

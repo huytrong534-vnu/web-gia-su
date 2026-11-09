@@ -907,14 +907,48 @@
                         <span>3. Tổng kết học phí cuối tháng</span>
                     </div>
 
-                    <div class="row g-2 mb-2 no-print">
+                    <!-- Thanh tiêu đề chế độ tính: đơn lẻ hoặc gộp -->
+                    <div class="d-flex justify-content-between align-items-center mb-2 no-print">
+                        <label class="form-label-custom mb-0">Học sinh & Tháng</label>
+                        <div class="form-check form-switch mb-0" style="font-size: 0.82rem;">
+                            <input class="form-check-input" type="checkbox" id="toggleMergeInvoice" onchange="handleMergeToggle()">
+                            <label class="form-check-label fw-bold text-primary" for="toggleMergeInvoice" style="cursor: pointer;">
+                                <i class="bi bi-layers-fill me-1"></i>Gộp Onl & Off / Nhiều HS
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chế độ 1: Chọn 1 học sinh đơn lẻ (mặc định) -->
+                    <div class="row g-2 mb-2 no-print" id="singleStudentControls">
                         <div class="col-7">
                             <label class="form-label-custom">Học sinh</label>
                             <select id="searchStudentSelect" class="form-select"></select>
                         </div>
                         <div class="col-5">
                             <label class="form-label-custom">Tháng</label>
-                            <input type="month" id="searchMonth" class="form-control" onchange="loadStats()">
+                            <input type="month" id="searchMonth" class="form-control" onchange="syncSearchMonth(this.value); loadStats();">
+                        </div>
+                    </div>
+
+                    <!-- Chế độ 2: Gộp nhiều học sinh (Off & Onl hoặc anh em) vào 1 QR -->
+                    <div id="mergeStudentControls" class="d-none no-print mb-2">
+                        <div class="mb-2">
+                            <label class="form-label-custom">Tháng tính học phí</label>
+                            <input type="month" id="searchMonthMerged" class="form-control" onchange="syncSearchMonth(this.value); loadStats();">
+                        </div>
+                        <div class="p-2 bg-light rounded-3 border mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small fw-bold text-dark"><i class="bi bi-check2-square text-primary me-1"></i>Tích chọn học sinh gộp vào 1 phiếu:</span>
+                                <span class="badge bg-primary-subtle text-primary" id="mergeSelectedCountBadge">0 đã chọn</span>
+                            </div>
+                            <div id="mergeStudentCheckboxes" class="d-flex flex-column gap-1 mb-2" style="max-height: 160px; overflow-y: auto;">
+                                <!-- Danh sách học sinh -->
+                            </div>
+                            <div>
+                                <label class="form-label-custom mb-1" style="font-size: 0.78rem;">Tên chung trên phiếu & QR (tự động nhận diện):</label>
+                                <input type="text" id="mergeCustomName" class="form-control form-control-sm" placeholder="VD: Bảo Linh">
+                                <div class="text-muted mt-1" style="font-size: 0.71rem;">* Hệ thống tự bỏ chữ off/onl để lấy tên chuẩn, hoặc bạn có thể chỉnh sửa tùy ý.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -948,14 +982,23 @@
                                         <div class="fw-bold text-dark fs-6" id="invMonth"></div>
                                     </div>
                                     <div class="col-6">
-                                        <span class="text-muted">Đơn giá:</span>
-                                        <div class="fw-bold"><span id="invFee"></span> đ/buổi</div>
+                                        <span class="text-muted" id="invFeeLabel">Đơn giá:</span>
+                                        <div class="fw-bold" id="invFeeBox"><span id="invFee"></span> đ/buổi</div>
                                     </div>
                                     <div class="col-6 text-end">
                                         <span class="text-muted">Số buổi tính phí:</span>
                                         <div class="fw-bold text-success fs-6"><span id="invBillableCount">0</span> buổi</div>
                                     </div>
                                 </div>
+
+                                <!-- KHUNG CHI TIẾT TỪNG PHÂN LOẠI KHI GỘP NHIỀU MỨC PHÍ -->
+                                <div id="invBreakdownContainer" class="d-none mt-2 pt-2 border-top">
+                                    <div class="small fw-bold text-secondary mb-1">
+                                        <i class="bi bi-list-nested me-1"></i>Chi tiết phân loại & học phí:
+                                    </div>
+                                    <div id="invBreakdownList" class="d-flex flex-column gap-1"></div>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top justify-content-between align-items-center" style="font-size: 0.76rem;">
                                     <span><i class="bi bi-check-circle-fill text-success me-1"></i>Hoàn thành: <b id="invCompletedCount">0</b></span>
                                     <span><i class="bi bi-arrow-repeat text-warning me-1"></i>Dạy bù: <b id="invMakeupCount">0</b></span>
@@ -1741,6 +1784,8 @@
         const now = new Date();
         const curMonthStr = now.toISOString().slice(0, 7);
         document.getElementById('searchMonth').value = curMonthStr;
+        const searchMonthMergedEl = document.getElementById('searchMonthMerged');
+        if (searchMonthMergedEl) searchMonthMergedEl.value = curMonthStr;
         document.getElementById('lessonDate').value = now.toISOString().slice(0, 10);
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         document.getElementById('endDate').value = lastDay.toISOString().slice(0, 10);
@@ -1833,6 +1878,7 @@
             searchSelect.innerHTML = cachedStudents.map(s =>
                 `<option value="${s.name}">${s.name}</option>`
             ).join('');
+            renderMergeStudentCheckboxes();
 
             if (selectedId) {
                 select.value = selectedId;
@@ -2060,13 +2106,120 @@
         await loadStats();
     }
 
+    function renderMergeStudentCheckboxes() {
+        const container = document.getElementById('mergeStudentCheckboxes');
+        if (!container) return;
+        if (!cachedStudents || cachedStudents.length === 0) {
+            container.innerHTML = '<div class="text-muted small py-1">Chưa có học sinh nào.</div>';
+            return;
+        }
+        const prevChecked = new Set(Array.from(document.querySelectorAll('.merge-student-cb:checked')).map(cb => cb.value));
+        container.innerHTML = cachedStudents.map(s => `
+            <label class="d-flex align-items-center justify-content-between p-1 px-2 rounded border bg-white mb-0" style="cursor: pointer; font-size: 0.82rem;">
+                <div class="d-flex align-items-center gap-2 text-truncate">
+                    <input type="checkbox" class="form-check-input merge-student-cb m-0 flex-shrink-0" value="${s.id}" data-name="${s.name}" ${prevChecked.has(String(s.id)) ? 'checked' : ''} onchange="onMergeStudentSelectionChange()">
+                    <span class="rounded-circle d-inline-block flex-shrink-0" style="width: 10px; height: 10px; background: ${s.color};"></span>
+                    <span class="fw-semibold text-dark text-truncate">${s.name}</span>
+                </div>
+                <span class="text-muted flex-shrink-0 ms-2" style="font-size: 0.76rem;">${formatVNNumber(s.fee)} đ/buổi</span>
+            </label>
+        `).join('');
+        updateMergeSelectionBadge();
+    }
+
+    function handleMergeToggle() {
+        const isMerged = document.getElementById('toggleMergeInvoice').checked;
+        const singleCtrl = document.getElementById('singleStudentControls');
+        const mergeCtrl = document.getElementById('mergeStudentControls');
+        if (isMerged) {
+            if (singleCtrl) singleCtrl.classList.add('d-none');
+            if (mergeCtrl) mergeCtrl.classList.remove('d-none');
+            const m1 = document.getElementById('searchMonth').value;
+            if (m1) document.getElementById('searchMonthMerged').value = m1;
+            
+            // Auto select matching students if single student is selected
+            const currentSingle = document.getElementById('searchStudentSelect').value;
+            const checked = Array.from(document.querySelectorAll('.merge-student-cb:checked'));
+            if (checked.length === 0 && currentSingle && cachedStudents) {
+                const root = currentSingle.replace(/[\s\-_\/]*[\(\[]?\s*(off|onl|online|offline)\s*[\)\]]?\s*$/i, '').trim().toLowerCase();
+                let matches = 0;
+                document.querySelectorAll('.merge-student-cb').forEach(cb => {
+                    const sName = cb.getAttribute('data-name') || '';
+                    const sRoot = sName.replace(/[\s\-_\/]*[\(\[]?\s*(off|onl|online|offline)\s*[\)\]]?\s*$/i, '').trim().toLowerCase();
+                    if (sRoot === root) {
+                        cb.checked = true;
+                        matches++;
+                    }
+                });
+                if (matches === 0) {
+                    document.querySelectorAll('.merge-student-cb').forEach(cb => {
+                        if (cb.getAttribute('data-name') === currentSingle) cb.checked = true;
+                    });
+                }
+                onMergeStudentSelectionChange();
+            }
+        } else {
+            if (singleCtrl) singleCtrl.classList.remove('d-none');
+            if (mergeCtrl) mergeCtrl.classList.add('d-none');
+            const m2 = document.getElementById('searchMonthMerged').value;
+            if (m2) document.getElementById('searchMonth').value = m2;
+        }
+    }
+
+    function syncSearchMonth(val) {
+        const m1 = document.getElementById('searchMonth');
+        const m2 = document.getElementById('searchMonthMerged');
+        if (m1 && m1.value !== val) m1.value = val;
+        if (m2 && m2.value !== val) m2.value = val;
+    }
+
+    function updateMergeSelectionBadge() {
+        const badge = document.getElementById('mergeSelectedCountBadge');
+        const count = document.querySelectorAll('.merge-student-cb:checked').length;
+        if (badge) badge.innerText = `${count} đã chọn`;
+    }
+
+    function onMergeStudentSelectionChange() {
+        updateMergeSelectionBadge();
+        const checked = Array.from(document.querySelectorAll('.merge-student-cb:checked'));
+        const customNameInput = document.getElementById('mergeCustomName');
+        if (!customNameInput) return;
+        if (checked.length === 0) {
+            customNameInput.value = '';
+            return;
+        }
+        const names = checked.map(cb => cb.getAttribute('data-name'));
+        const cleanNames = names.map(n => n.replace(/[\s\-_\/]*[\(\[]?\s*(off|onl|online|offline)\s*[\)\]]?\s*$/i, '').trim());
+        const uniqueClean = [...new Set(cleanNames)];
+        if (uniqueClean.length === 1 && uniqueClean[0]) {
+            customNameInput.value = uniqueClean[0];
+        } else {
+            customNameInput.value = names.join(' & ');
+        }
+    }
+
     async function calculateInvoice() {
-        const name = document.getElementById('searchStudentSelect').value;
-        const month = document.getElementById('searchMonth').value;
+        const isMergeMode = document.getElementById('toggleMergeInvoice') && document.getElementById('toggleMergeInvoice').checked;
+        let url = '';
 
-        if (!name || !month) return alert("Vui lòng chọn học sinh và tháng!");
+        if (isMergeMode) {
+            const checkedCbs = Array.from(document.querySelectorAll('.merge-student-cb:checked'));
+            if (checkedCbs.length === 0) {
+                return alert("Vui lòng tích chọn ít nhất 1 học sinh để gộp phiếu học phí!");
+            }
+            const sIds = checkedCbs.map(cb => cb.value).join(',');
+            const month = document.getElementById('searchMonthMerged').value || document.getElementById('searchMonth').value;
+            if (!month) return alert("Vui lòng chọn tháng tính học phí!");
+            const customName = document.getElementById('mergeCustomName').value.trim();
+            url = `/api/invoice?student_ids=${encodeURIComponent(sIds)}&month=${month}&custom_name=${encodeURIComponent(customName)}`;
+        } else {
+            const name = document.getElementById('searchStudentSelect').value;
+            const month = document.getElementById('searchMonth').value;
+            if (!name || !month) return alert("Vui lòng chọn học sinh và tháng!");
+            url = `/api/invoice?name=${encodeURIComponent(name)}&month=${month}`;
+        }
 
-        const res = await fetch(`/api/invoice?name=${encodeURIComponent(name)}&month=${month}`);
+        const res = await fetch(url);
         const data = await res.json();
 
         if (!res.ok) return alert(data.error);
@@ -2077,7 +2230,34 @@
         document.getElementById('invName').innerText = data.student_name;
         const [year, m] = data.month.split('-');
         document.getElementById('invMonth').innerText = `Tháng ${m}/${year}`;
-        document.getElementById('invFee').innerText = formatVNNumber(data.fee_per_session);
+
+        const feeCol = document.getElementById('invFeeLabel');
+        const feeBox = document.getElementById('invFeeBox');
+        const breakdownContainer = document.getElementById('invBreakdownContainer');
+        const breakdownList = document.getElementById('invBreakdownList');
+
+        if (data.is_merged) {
+            if (feeCol) feeCol.innerText = 'Đơn giá:';
+            if (feeBox) feeBox.innerHTML = '<span class="text-primary fw-bold" style="font-size:0.85rem;">Nhiều mức phí</span>';
+            if (breakdownContainer && breakdownList) {
+                breakdownContainer.classList.remove('d-none');
+                breakdownList.innerHTML = data.students_breakdown.map(b => `
+                    <div class="d-flex justify-content-between align-items-center py-1 px-2 rounded border" style="background: #f8fafc; font-size: 0.78rem;">
+                        <div class="d-flex align-items-center gap-2 text-truncate">
+                            <span class="rounded-circle d-inline-block flex-shrink-0" style="width: 9px; height: 9px; background: ${b.color};"></span>
+                            <span class="fw-semibold text-dark text-truncate">${b.name} <span class="text-muted fw-normal">(${formatVNNumber(b.fee_per_session)}đ)</span>:</span>
+                            <span class="badge bg-secondary-subtle text-secondary fw-semibold flex-shrink-0">${b.billable_sessions} buổi</span>
+                        </div>
+                        <div class="fw-bold text-slate-800 flex-shrink-0 ms-2">${formatVNNumber(b.subtotal)} đ</div>
+                    </div>
+                `).join('');
+            }
+        } else {
+            if (feeCol) feeCol.innerText = 'Đơn giá:';
+            if (feeBox) feeBox.innerHTML = `<span id="invFee">${formatVNNumber(data.fee_per_session)}</span> đ/buổi`;
+            if (breakdownContainer) breakdownContainer.classList.add('d-none');
+        }
+
         document.getElementById('invBillableCount').innerText = data.billable_sessions;
         document.getElementById('invCompletedCount').innerText = data.completed_count;
         document.getElementById('invMakeupCount').innerText = data.makeup_count;
@@ -2100,10 +2280,16 @@
                 badgeHtml = `<span class="badge-status-scheduled">Chưa dạy</span>`;
             }
 
+            let subTagHtml = '';
+            if (data.is_merged) {
+                subTagHtml = `<div class="mt-1"><span class="badge text-white" style="background:${s.student_color}; font-size:0.7rem; font-weight:500; padding: 2px 6px;">${s.student_name} (${formatVNNumber(s.fee_per_session)}đ)</span></div>`;
+            }
+
             return `
                 <tr class="${rowClass}">
                     <td>
                         <div class="fw-bold text-slate-800" style="font-size: 0.82rem;">${s.full_date}</div>
+                        ${subTagHtml}
                     </td>
                     <td>
                         <span class="text-secondary small fw-medium">${s.time}</span>
