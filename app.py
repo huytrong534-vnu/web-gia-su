@@ -600,10 +600,15 @@ def handle_lessons():
         return jsonify([])
 
     if request.method == 'POST':
-        data = request.json
-        student = Student.query.filter_by(id=data['student_id'], user_id=user.id).first_or_404()
-        start_time = data['start_time']
-        end_time = data['end_time']
+        data = request.json or {}
+        try:
+            st_id = int(data.get('student_id'))
+        except (ValueError, TypeError):
+            return jsonify({"error": "ID học sinh không hợp lệ!"}), 400
+
+        student = Student.query.filter_by(id=st_id, user_id=user.id).first_or_404()
+        start_time = data.get('start_time', '19:30')
+        end_time = data.get('end_time', '21:30')
         note = data.get('note', '')
         is_recurring = data.get('is_recurring', False)
         ignore_conflict = data.get('ignore_conflict', False)
@@ -611,7 +616,10 @@ def handle_lessons():
         conflicts = []
 
         if not is_recurring:
-            date = data['date']
+            date = data.get('date')
+            if not date:
+                return jsonify({"error": "Vui lòng chọn ngày học!"}), 400
+
             conflict = check_time_conflict(user.id, date, start_time, end_time)
             if conflict and not ignore_conflict:
                 return jsonify({
@@ -629,8 +637,13 @@ def handle_lessons():
             db.session.commit()
             return jsonify({"message": "Đã tạo buổi học thành công!"})
         else:
-            start_dt = datetime.strptime(data['date'], "%Y-%m-%d")
-            end_dt = datetime.strptime(data['end_date'], "%Y-%m-%d")
+            date_str = data.get('date')
+            end_date_str = data.get('end_date')
+            if not date_str or not end_date_str:
+                return jsonify({"error": "Vui lòng chọn ngày bắt đầu và ngày kết thúc!"}), 400
+
+            start_dt = datetime.strptime(date_str, "%Y-%m-%d")
+            end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
             weekdays = [int(d) for d in data.get('weekdays', [])]
 
             to_create = []
@@ -679,6 +692,7 @@ def handle_lessons():
             color = base_color
             prefix = "● "
 
+        text_color = "#0f172a" if color == "#eab308" else "#ffffff"
         events.append({
             "id": l.id,
             "title": f"{prefix}{l.student.name} ({l.start_time}-{l.end_time})",
@@ -686,6 +700,7 @@ def handle_lessons():
             "end": f"{l.date}T{l.end_time}:00",
             "backgroundColor": color,
             "borderColor": color,
+            "textColor": text_color,
             "extendedProps": {
                 "student_name": l.student.name,
                 "student_id": l.student_id,

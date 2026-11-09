@@ -806,12 +806,12 @@
                     <div class="mb-3">
                         <label class="form-label-custom">Màu nhận diện lịch:</label>
                         <div class="color-palette">
-                            <span class="color-chip active" data-color="#4f46e5" style="background:#4f46e5" onclick="selectStudentColor(this)" title="Indigo"></span>
-                            <span class="color-chip" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectStudentColor(this)" title="Violet"></span>
-                            <span class="color-chip" data-color="#10b981" style="background:#10b981" onclick="selectStudentColor(this)" title="Emerald"></span>
-                            <span class="color-chip" data-color="#f59e0b" style="background:#f59e0b" onclick="selectStudentColor(this)" title="Amber"></span>
-                            <span class="color-chip" data-color="#f43f5e" style="background:#f43f5e" onclick="selectStudentColor(this)" title="Rose"></span>
-                            <span class="color-chip" data-color="#06b6d4" style="background:#06b6d4" onclick="selectStudentColor(this)" title="Cyan"></span>
+                            <span class="color-chip active" data-color="#4f46e5" style="background:#4f46e5" onclick="selectStudentColor(this)" title="Xanh chàm"></span>
+                            <span class="color-chip" data-color="#ec4899" style="background:#ec4899" onclick="selectStudentColor(this)" title="Hồng tươi"></span>
+                            <span class="color-chip" data-color="#0284c7" style="background:#0284c7" onclick="selectStudentColor(this)" title="Xanh biển"></span>
+                            <span class="color-chip" data-color="#eab308" style="background:#eab308" onclick="selectStudentColor(this)" title="Vàng tươi"></span>
+                            <span class="color-chip" data-color="#f43f5e" style="background:#f43f5e" onclick="selectStudentColor(this)" title="Đỏ tươi"></span>
+                            <span class="color-chip" data-color="#06b6d4" style="background:#06b6d4" onclick="selectStudentColor(this)" title="Xanh ngọc"></span>
                         </div>
                         <input type="hidden" id="studentColor" value="#4f46e5">
                     </div>
@@ -895,7 +895,7 @@
                         <input type="text" id="lessonNote" class="form-control" placeholder="Ghi chú bài học (không bắt buộc)">
                     </div>
 
-                    <button onclick="addLesson()" class="btn btn-gradient-success w-100">
+                    <button onclick="addLesson()" id="btnAddLesson" class="btn btn-gradient-success w-100">
                         <i class="bi bi-plus-lg me-1"></i> Thêm vào lịch
                     </button>
                 </div>
@@ -1960,7 +1960,8 @@
     }
 
     async function addLesson(ignoreConflict = false) {
-        const student_id = document.getElementById('lessonStudent').value;
+        const studentSelect = document.getElementById('lessonStudent');
+        const student_id_raw = studentSelect ? studentSelect.value : '';
         const date = document.getElementById('lessonDate').value;
         const start_time = document.getElementById('startTime').value;
         const end_time = document.getElementById('endTime').value;
@@ -1968,12 +1969,15 @@
         const is_recurring = document.getElementById('isRecurring').checked;
         const end_date = document.getElementById('endDate').value;
 
-        if (!student_id || !date) return alert("Vui lòng chọn học sinh và ngày học!");
+        if (!student_id_raw || !date) return alert("Vui lòng chọn học sinh và ngày học!");
+        const student_id = parseInt(student_id_raw, 10);
+        if (isNaN(student_id)) return alert("Vui lòng chọn học sinh hợp lệ!");
 
         let weekdays = [];
         if (is_recurring) {
             document.querySelectorAll('.wk-day:checked').forEach(cb => weekdays.push(cb.value));
             if (weekdays.length === 0) return alert("Vui lòng tích chọn ít nhất 1 thứ trong tuần!");
+            if (!end_date) return alert("Vui lòng chọn ngày kết thúc cho lịch lặp lại!");
         }
 
         const payload = {
@@ -1981,35 +1985,51 @@
             is_recurring, end_date, weekdays, ignore_conflict: ignoreConflict
         };
 
-        const res = await fetch('/api/lessons', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
-        });
-
-        const result = await res.json();
-
-        if (res.status === 409 && result.has_conflict) {
-            let conflictMsg = `⚠️ CẢNH BÁO TRÙNG LỊCH:\n${result.message}\n\n`;
-            if (result.conflicts && result.conflicts.length > 0) {
-                result.conflicts.forEach(c => {
-                    conflictMsg += `• Ngày ${c.date} (${c.time}): Đang dạy ${c.student_name}\n`;
-                });
-            }
-            conflictMsg += `\nBạn có muốn VẪN LƯU buổi học này không?`;
-            if (confirm(conflictMsg)) {
-                return addLesson(true);
-            }
-            return;
+        const btnAdd = document.getElementById('btnAddLesson');
+        if (btnAdd) {
+            btnAdd.disabled = true;
+            btnAdd.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
         }
 
-        if (res.ok) {
-            document.getElementById('lessonNote').value = '';
-            calendar.refetchEvents();
-            await loadStats();
-            alert(result.message);
-        } else {
-            alert(result.message || "Lỗi khi lưu lịch!");
+        try {
+            const res = await fetch('/api/lessons', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+
+            if (res.status === 409 && result.has_conflict) {
+                let conflictMsg = `⚠️ CẢNH BÁO TRÙNG LỊCH:\n${result.message}\n\n`;
+                if (result.conflicts && result.conflicts.length > 0) {
+                    result.conflicts.forEach(c => {
+                        conflictMsg += `• Ngày ${c.date} (${c.time}): Đang dạy ${c.student_name}\n`;
+                    });
+                }
+                conflictMsg += `\nBạn có muốn VẪN LƯU buổi học này không?`;
+                if (confirm(conflictMsg)) {
+                    return addLesson(true);
+                }
+                return;
+            }
+
+            if (res.ok) {
+                document.getElementById('lessonNote').value = '';
+                calendar.refetchEvents();
+                await loadStats();
+                alert(result.message || "Đã tạo buổi học thành công!");
+            } else {
+                alert(result.error || result.message || "Lỗi khi lưu lịch!");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Lỗi kết nối máy chủ: " + err.message);
+        } finally {
+            if (btnAdd) {
+                btnAdd.disabled = false;
+                btnAdd.innerHTML = '<i class="bi bi-plus-lg me-1"></i> Thêm vào lịch';
+            }
         }
     }
 
